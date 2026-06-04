@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All In: The AI-Native Developer Playbook</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=JetBrains+Mono:wght@400;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        /* === CASINO THEME TOKENS === */
+        :root {
+            --bg-felt:#0a1f0e; --bg-dark:#060f08; --bg-card:#0e2412;
+            --felt-mid:#0f2814; --felt-light:#163320;
+            --gold:#c9a84c; --gold-light:#e8c96a; --gold-dim:#7a6230;
+            --ivory:#f5efe0; --ivory-dim:#c9bfa2;
+            --red-suit:#c0392b; --red-dim:#8b2222;
+            --text-primary:#f5efe0; --text-secondary:#c9bfa2; --text-muted:#7a7060;
+            --border-gold:rgba(201,168,76,0.4); --border-felt:rgba(201,168,76,0.15);
+            --font-display:'Playfair Display',Georgia,serif;
+            --font-body:'Lato',sans-serif;
+            --font-mono:'JetBrains Mono',monospace;
+            --title-size:clamp(2rem,6vw,5rem);
+            --h2-size:clamp(1.4rem,3.5vw,2.8rem);
+            --h3-size:clamp(1rem,2.5vw,1.6rem);
+            --body-size:clamp(0.78rem,1.4vw,1.05rem);
+            --small-size:clamp(0.65rem,1vw,0.85rem);
+            --slide-padding:clamp(1.5rem,4vw,4.5rem);
+            --content-gap:clamp(0.6rem,1.8vw,1.8rem);
+            --element-gap:clamp(0.3rem,0.8vw,0.8rem);
+            --ease-out-expo:cubic-bezier(0.16,1,0.3,1);
+        }
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+        html,body{height:100%;overflow-x:hidden;background:var(--bg-dark);font-family:var(--font-body);color:var(--text-primary);}
+        html{scroll-snap-type:y mandatory;scroll-behavior:smooth;}
+
+        /* === VIEWPORT BASE === */
+        .slide{width:100vw;height:100vh;height:100dvh;overflow:hidden;scroll-snap-align:start;display:flex;flex-direction:column;position:relative;}
+        .slide-content{flex:1;display:flex;flex-direction:column;justify-content:center;max-height:100%;overflow:hidden;padding:var(--slide-padding);}
+        .slide::before{content:'';position:absolute;inset:0;background-image:radial-gradient(ellipse at 50% 50%,rgba(22,51,32,0.6) 0%,transparent 70%),url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;}
+        .slide>*{position:relative;z-index:1;}
+        .slide::after{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0.5;}
+
+        /* === REVEAL === */
+        .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s var(--ease-out-expo),transform .7s var(--ease-out-expo);}
+        .reveal-scale{opacity:0;transform:scale(0.88);transition:opacity .6s var(--ease-out-expo),transform .6s var(--ease-out-expo);}
+        .reveal-left{opacity:0;transform:translateX(-40px);transition:opacity .6s var(--ease-out-expo),transform .6s var(--ease-out-expo);}
+        .slide.visible .reveal,.slide.visible .reveal-scale,.slide.visible .reveal-left{opacity:1;transform:none;}
+        .d1{transition-delay:.05s}.d2{transition-delay:.15s}.d3{transition-delay:.25s}.d4{transition-delay:.35s}.d5{transition-delay:.45s}.d6{transition-delay:.55s}
+
+        /* === CHROME — progress bar only; nav replaced by chip indicator === */
+        .progress-bar{position:fixed;top:0;left:0;height:3px;width:0%;background:linear-gradient(90deg,var(--gold-dim),var(--gold),var(--gold-light));z-index:9999;transition:width .3s ease;box-shadow:0 0 8px var(--gold);}
+
+        /* Bottom chip-stack navigation — row of mini chips, active one is full poker chip */
+        .chip-nav{position:fixed;bottom:clamp(.6rem,1.5vh,1.2rem);left:50%;transform:translateX(-50%);display:flex;align-items:flex-end;gap:clamp(3px,0.5vw,6px);z-index:9998;pointer-events:none;}
+        .chip-nav-item{
+            width:clamp(8px,1.2vw,14px);height:clamp(8px,1.2vw,14px);
+            border-radius:50%;border:1px solid var(--gold-dim);
+            background:transparent;cursor:pointer;pointer-events:all;
+            transition:all .35s var(--ease-out-expo);
+            flex-shrink:0;
+        }
+        .chip-nav-item.active{
+            width:clamp(18px,2.5vw,28px);height:clamp(18px,2.5vw,28px);
+            border:none;
+            background:repeating-conic-gradient(from 0deg,var(--gold) 0deg 14deg,#1a3a1a 14deg 50deg);
+            box-shadow:0 0 10px rgba(201,168,76,0.6),0 2px 6px rgba(0,0,0,0.5);
+            padding:clamp(2px,0.3vw,3px);
+        }
+        .chip-nav-item.active::after{
+            content:'';display:block;width:100%;height:100%;
+            border-radius:50%;
+            background:radial-gradient(circle at 35% 30%,#1a3a1a,#0a180c);
+            border:1px dashed var(--gold);
+        }
+
+        /* === SLIDE LABEL === */
+        .slide-label{position:absolute;top:clamp(.8rem,2vh,1.5rem);left:var(--slide-padding);font-family:var(--font-mono);font-size:var(--small-size);color:var(--gold-dim);letter-spacing:.12em;text-transform:uppercase;display:flex;align-items:center;gap:.4em;}
+        .suit.spade{color:var(--ivory-dim)}.suit.heart{color:var(--red-suit)}.suit.diamond{color:var(--red-suit)}.suit.club{color:var(--ivory-dim)}
+
+        /* === SECTION BREAK === */
+        .slide-section{background:radial-gradient(ellipse at 30% 50%,#1a180a 0%,#060f08 70%);}
+        .section-ghost{position:absolute;right:5%;top:50%;transform:translateY(-50%);font-family:var(--font-mono);font-size:clamp(5rem,15vw,12rem);font-weight:600;color:rgba(201,168,76,0.06);line-height:1;pointer-events:none;user-select:none;}
+        .section-tag{font-family:var(--font-mono);font-size:var(--small-size);color:var(--gold);letter-spacing:.2em;text-transform:uppercase;margin-bottom:.5em;}
+        .section-title{font-family:var(--font-display);font-size:var(--h2-size);font-weight:700;color:var(--gold-light);line-height:1.15;max-width:68%;}
+        .section-desc{font-size:var(--body-size);color:var(--text-secondary);max-width:58%;line-height:1.7;margin-top:.7em;}
+
+        /* === TITLE SLIDE === */
+        .slide-title{background:radial-gradient(ellipse at 50% 40%,#102a14 0%,#06120a 60%,#030a05 100%);align-items:center;justify-content:center;text-align:center;}
+        .corner-suit{position:absolute;font-size:clamp(3rem,8vw,7rem);opacity:.06;pointer-events:none;}
+        .corner-suit.tl{top:2vh;left:2vw;color:var(--ivory)}.corner-suit.tr{top:2vh;right:2vw;color:var(--red-suit);transform:rotate(180deg)}.corner-suit.bl{bottom:2vh;left:2vw;color:var(--red-suit)}.corner-suit.br{bottom:2vh;right:2vw;color:var(--ivory);transform:rotate(180deg)}
+        @keyframes chipFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+        .title-chip{width:clamp(60px,10vw,100px);height:clamp(60px,10vw,100px);border-radius:50%;border:4px dashed var(--gold);display:flex;align-items:center;justify-content:center;margin:0 auto clamp(.8rem,2vh,1.5rem);font-size:clamp(1.5rem,4vw,3rem);animation:chipFloat 3s ease-in-out infinite;background:radial-gradient(circle at 35% 35%,#1a3a1a,#0a180c);box-shadow:0 0 20px rgba(201,168,76,0.3),inset 0 0 20px rgba(0,0,0,0.5);}
+        .title-eyebrow{font-family:var(--font-mono);font-size:var(--small-size);letter-spacing:.25em;color:var(--gold);text-transform:uppercase;margin-bottom:.5em;}
+        .title-main{font-family:var(--font-display);font-size:var(--title-size);font-weight:900;color:var(--gold-light);line-height:1.05;text-shadow:0 2px 20px rgba(201,168,76,0.4);}
+        .title-main em{font-style:italic;color:var(--ivory);}
+        .title-sub{font-size:var(--h3-size);color:var(--text-secondary);font-weight:300;margin-top:.5em;letter-spacing:.05em;}
+        .suit-divider{display:flex;align-items:center;gap:.8em;justify-content:center;margin:clamp(.6rem,1.5vh,1.2rem) 0;color:var(--gold-dim);font-size:clamp(.9rem,1.5vw,1.2rem);}
+        .suit-divider::before,.suit-divider::after{content:'';height:1px;width:clamp(40px,8vw,100px);}
+        .suit-divider::before{background:linear-gradient(90deg,transparent,var(--gold-dim));}
+        .suit-divider::after{background:linear-gradient(270deg,transparent,var(--gold-dim));}
+
+        /* === TYPOGRAPHY === */
+        .slide-heading{font-family:var(--font-display);font-size:var(--h2-size);color:var(--gold-light);font-weight:700;line-height:1.15;margin-bottom:clamp(.3rem,.8vh,.7rem);}
+        .slide-subheading{font-family:var(--font-mono);font-size:var(--small-size);color:var(--gold-dim);letter-spacing:.15em;text-transform:uppercase;margin-bottom:clamp(.5rem,1.2vh,1rem);}
+
+        /* === CARDS === */
+        .card-grid{display:grid;gap:var(--element-gap);}
+        .card-grid.cols-2{grid-template-columns:1fr 1fr;}
+        .card-grid.cols-3{grid-template-columns:1fr 1fr 1fr;}
+        .info-card{background:var(--bg-card);border:1px solid var(--border-felt);border-radius:8px;padding:clamp(.8rem,1.5vw,1.4rem);position:relative;overflow:hidden;}
+        .info-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold-dim),transparent);opacity:.5;}
+        .info-card.gold-border{border-color:var(--border-gold);}
+        .info-card.red-accent::before{background:linear-gradient(90deg,transparent,var(--red-suit),transparent);}
+        .info-card.red-accent{border-color:rgba(192,57,43,0.3);}
+        .info-card.green-accent::before{background:linear-gradient(90deg,transparent,#2a8a2a,transparent);}
+        .info-card.green-accent{border-color:rgba(42,138,42,0.3);}
+        .info-card.purple-accent{border-color:rgba(150,80,220,0.3);}
+        .info-card.purple-accent::before{background:linear-gradient(90deg,transparent,#9050dc,transparent);}
+        .info-card.blue-accent{border-color:rgba(42,106,223,0.4);}
+        .info-card.blue-accent::before{background:linear-gradient(90deg,transparent,#2a6adf,transparent);}
+        .card-icon{font-size:clamp(1.2rem,2.5vw,1.8rem);margin-bottom:.4em;}
+        .card-title{font-family:var(--font-display);font-size:var(--h3-size);color:var(--gold-light);margin-bottom:.4em;font-weight:700;}
+        .card-body{font-size:var(--body-size);color:var(--text-secondary);line-height:1.6;}
+
+        /* === LISTS === */
+        .bullet-list{list-style:none;display:flex;flex-direction:column;gap:var(--element-gap);}
+        .bullet-list li{font-size:var(--body-size);color:var(--text-secondary);display:flex;align-items:flex-start;gap:.6em;line-height:1.55;}
+        .bullet-list li::before{content:'◆';color:var(--gold);font-size:.6em;margin-top:.35em;flex-shrink:0;}
+        .bullet-list li strong{color:var(--ivory);font-weight:700;}
+        .bullet-list li code,.bullet-list li span.c{font-family:var(--font-mono);font-size:.88em;background:rgba(201,168,76,0.1);color:var(--gold-light);padding:.1em .4em;border-radius:3px;}
+
+        /* === CALLOUT / TIP / ALERT === */
+        .callout-box{background:linear-gradient(135deg,rgba(201,168,76,0.08),rgba(201,168,76,0.02));border:1px solid var(--border-gold);border-radius:8px;padding:clamp(.8rem,1.5vw,1.4rem);}
+        .callout-box blockquote{font-family:var(--font-display);font-style:italic;font-size:var(--h3-size);color:var(--ivory);line-height:1.45;}
+        .callout-box cite{display:block;margin-top:.6em;font-family:var(--font-mono);font-size:var(--small-size);color:var(--gold-dim);font-style:normal;}
+        .alert-box{background:rgba(192,57,43,0.08);border:1px solid rgba(192,57,43,0.3);border-radius:8px;padding:clamp(.6rem,1.2vw,1rem);font-size:var(--body-size);color:#ff8a8a;}
+        .tip-box{background:rgba(201,168,76,0.06);border-left:3px solid var(--gold);padding:clamp(.6rem,1.2vw,1rem);font-size:var(--body-size);color:var(--text-secondary);border-radius:0 6px 6px 0;}
+        .tip-box strong{color:var(--gold);}
+
+        /* === CODE === */
+        .code-block{background:rgba(0,0,0,0.6);border:1px solid rgba(201,168,76,0.15);border-radius:6px;padding:clamp(.8rem,1.5vw,1.2rem);font-family:var(--font-mono);font-size:var(--small-size);line-height:1.6;overflow:hidden;}
+        .kw{color:#6dff8a}.st{color:var(--gold-light)}.cm{color:var(--text-muted);font-style:italic}.ky{color:#8aaeff}.vl{color:#c08aff}
+        .snippet{font-family:var(--font-mono);font-size:var(--small-size);background:rgba(201,168,76,0.1);color:var(--gold-light);padding:.15em .5em;border-radius:3px;display:inline-block;}
+
+        /* === TOKEN BARS === */
+        .token-bar{height:clamp(18px,2.5vh,28px);border-radius:4px;overflow:hidden;background:rgba(0,0,0,0.4);border:1px solid var(--border-felt);display:flex;}
+        .token-bar-fill{height:100%;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:var(--small-size);font-weight:600;transition:width 1.5s var(--ease-out-expo);}
+        .bar-system{background:linear-gradient(90deg,#1a4a1a,#2a6a2a);color:#6dff8a;}
+        .bar-history{background:linear-gradient(90deg,#4a1a1a,#7a2a2a);color:#ff8a8a;}
+        .bar-files{background:linear-gradient(90deg,#1a2a4a,#2a4a7a);color:#8aaeff;}
+        .bar-tools{background:linear-gradient(90deg,#3a2a0a,#6a4a1a);color:#ffd060;}
+        .bar-free{background:linear-gradient(90deg,rgba(201,168,76,0.15),rgba(201,168,76,0.05));color:var(--gold-dim);border-left:1px solid var(--border-gold);}
+
+        /* === ATTENTION BARS === */
+        .attention-bars{display:flex;align-items:flex-end;justify-content:center;gap:clamp(1rem,3vw,2.5rem);height:clamp(80px,15vh,140px);}
+        .attn-bar-wrap{display:flex;flex-direction:column;align-items:center;gap:.4em;}
+        .attn-bar{width:clamp(50px,10vw,90px);border-radius:4px 4px 0 0;}
+        .attn-bar.high{background:linear-gradient(180deg,#2a6a2a,#1a4a1a);border:1px solid #2a8a2a;}
+        .attn-bar.low{background:linear-gradient(180deg,#4a1a1a,#2a0a0a);border:1px solid #7a2a2a;}
+        .attn-label{font-family:var(--font-mono);font-size:var(--small-size);color:var(--text-muted);text-align:center;}
+        .attn-value{font-family:var(--font-mono);font-size:var(--small-size);font-weight:600;}
+        .attn-value.hv{color:#6dff8a}.attn-value.lv{color:#ff6b6b}
+
+        /* === BACKGROUNDS === */
+        .bg-roulette{background:radial-gradient(ellipse at 50% 50%,#112216 0%,#060f08 100%);}
+        .bg-blackjack{background:radial-gradient(ellipse at 20% 60%,#0f2018 0%,#060d08 70%);}
+        .bg-slots{background:radial-gradient(ellipse at 70% 30%,#151a10 0%,#060a06 80%);}
+        .bg-poker{background:radial-gradient(ellipse at 40% 50%,#0e1c14 0%,#050d07 100%);}
+        .bg-highroller{background:radial-gradient(ellipse at 60% 40%,#1a180a 0%,#080600 80%);}
+
+        /* === FLOATING CHIPS (title slide) === */
+        @keyframes floatChip{0%{transform:translateY(100vh) rotate(0deg);opacity:0;}10%{opacity:.35;}90%{opacity:.35;}100%{transform:translateY(-20vh) rotate(720deg);opacity:0;}}
+        .bg-chips{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0;}
+        .bg-chip{position:absolute;bottom:-50px;border-radius:50%;opacity:0;animation:floatChip linear infinite;}
+
+        /* ═══════════════════════════════════════════════════
+           v2 — THEME UPGRADES: shimmer, chip wedges, vignette,
+           card-deal, pip watermarks, chip-stripe token bars
+           ═══════════════════════════════════════════════════ */
+
+        /* Felt-table vignette — every slide has soft dark edges */
+        .slide{box-shadow:inset 0 0 clamp(80px,15vw,220px) rgba(0,0,0,0.55);}
+
+        /* Subtle diamond-weave on the felt — adds texture to plain greens */
+        .slide::before{
+            background-image:
+              radial-gradient(ellipse at 50% 50%,rgba(22,51,32,0.6) 0%,transparent 70%),
+              repeating-linear-gradient(45deg,rgba(201,168,76,0.015) 0 1px,transparent 1px 14px),
+              repeating-linear-gradient(-45deg,rgba(201,168,76,0.015) 0 1px,transparent 1px 14px),
+              url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+        }
+
+        /* Gold-shimmer text — gilded text catching the light */
+        .slide-heading,.section-title,.title-main{
+            background:linear-gradient(110deg,
+              var(--gold-light) 0%,
+              var(--gold-light) 35%,
+              #fff5c8 50%,
+              var(--gold-light) 65%,
+              var(--gold-light) 100%);
+            background-size:250% auto;
+            background-position:200% center;
+            background-clip:text;
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
+            color:transparent;
+        }
+        @keyframes goldShimmer{from{background-position:0% center;}to{background-position:200% center;}}
+        .slide.visible .slide-heading,
+        .slide.visible .section-title,
+        .slide.visible .title-main{animation:goldShimmer 2.4s var(--ease-out-expo) .3s 1;}
+        /* Preserve ivory on italic */
+        .title-main em{background:none;-webkit-text-fill-color:var(--ivory);color:var(--ivory);-webkit-background-clip:initial;background-clip:initial;}
+
+        /* Card-deal animation — info cards "dealt" into place */
+        .reveal-deal{opacity:0;transform:translateY(50px) rotateX(-18deg) scale(.95);transform-origin:50% 100%;transition:opacity .85s var(--ease-out-expo),transform .85s var(--ease-out-expo);}
+        .slide.visible .reveal-deal{opacity:1;transform:none;}
+
+        /* Suit pip watermark — bottom corner of every info card */
+        .info-card{padding-bottom:clamp(1.1rem,2vw,1.8rem);}
+        .info-card::after{content:'◆';position:absolute;bottom:.4em;right:.6em;font-size:.85rem;color:rgba(201,168,76,0.09);pointer-events:none;line-height:1;font-family:var(--font-display);}
+        .info-card.red-accent::after{content:'♥';color:rgba(192,57,43,0.12);}
+        .info-card.green-accent::after{content:'♣';color:rgba(108,200,108,0.1);}
+        .info-card.purple-accent::after{content:'♠';color:rgba(192,138,255,0.1);}
+        .info-card.blue-accent::after{content:'♦';color:rgba(138,174,255,0.1);}
+
+        /* Token-bar chip-stripe edges — bars look like rows of poker chips */
+        .token-bar-fill{position:relative;}
+        .token-bar-fill::after{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(90deg,transparent 0 18px,rgba(0,0,0,0.18) 18px 19px);pointer-events:none;}
+
+        /* Real poker-chip title chip — alternating gold wedges + dashed inner ring */
+        .title-chip{
+            width:clamp(80px,12vw,120px);
+            height:clamp(80px,12vw,120px);
+            border-radius:50%;
+            border:none;
+            display:flex;align-items:center;justify-content:center;
+            margin:0 auto clamp(.8rem,2vh,1.5rem);
+            animation:chipFloat 3s ease-in-out infinite;
+            background:repeating-conic-gradient(from 0deg,var(--gold) 0deg 12deg,#1a3a1a 12deg 45deg);
+            box-shadow:0 0 30px rgba(201,168,76,0.4),0 8px 20px rgba(0,0,0,0.6),inset 0 0 12px rgba(0,0,0,0.5);
+            padding:8px;
+            font-size:0;
+        }
+        .title-chip-inner{
+            width:100%;height:100%;border-radius:50%;
+            background:radial-gradient(circle at 35% 30%,#1a3a1a 0%,#0a180c 80%);
+            border:2px dashed var(--gold);
+            display:flex;align-items:center;justify-content:center;
+            font-size:clamp(1.5rem,4vw,2.6rem);
+            padding-bottom:5px;
+            box-shadow:inset 0 0 18px rgba(0,0,0,0.8);
+        }
+
+        /* Decorative chip — section breaks get a hand-dealt chip in the corner */
+        .section-chip{
+            position:absolute;
+            width:clamp(70px,9vw,110px);
+            height:clamp(70px,9vw,110px);
+            border-radius:50%;
+            background:repeating-conic-gradient(from 0deg,var(--gold) 0deg 14deg,#1a180a 14deg 60deg);
+            box-shadow:0 0 25px rgba(201,168,76,0.35),0 8px 18px rgba(0,0,0,0.6),inset 0 0 10px rgba(0,0,0,0.5);
+            padding:7px;
+        }
+        .section-chip-inner{
+            width:100%;height:100%;border-radius:50%;
+            background:radial-gradient(circle at 35% 30%,#1a180a 0%,#080500 80%);
+            border:1.5px dashed var(--gold);
+            display:flex;align-items:center;justify-content:center;
+            color:var(--gold-light);
+            font-size:clamp(1.4rem,2.5vw,2rem);
+            box-shadow:inset 0 0 15px rgba(0,0,0,0.8);
+        }
+        .section-chip.sc-bl{bottom:8%;left:9%;animation:chipFloat 4.2s ease-in-out infinite;}
+        .section-chip.sc-tr{top:14%;right:11%;animation:chipFloat 5s ease-in-out infinite reverse;}
+
+        /* Chip-nav active item pulses */
+        @keyframes navPulse{0%,100%{box-shadow:0 0 10px rgba(201,168,76,0.6),0 2px 6px rgba(0,0,0,0.5);}50%{box-shadow:0 0 18px rgba(201,168,76,0.9),0 2px 8px rgba(0,0,0,0.6);}}
+        .chip-nav-item.active{animation:navPulse 2.5s ease-in-out infinite;}
+
+        /* Progress bar shimmer — gold flowing across as you advance */
+        .progress-bar{background:linear-gradient(90deg,var(--gold-dim),var(--gold),var(--gold-light),var(--gold),var(--gold-dim));background-size:200% 100%;animation:progressShine 4s linear infinite;}
+        @keyframes progressShine{0%{background-position:0% center;}100%{background-position:200% center;}}
+
+        /* Stronger felt edge — table-side gilt line */
+        .slide::after{height:2px;background:linear-gradient(90deg,transparent,var(--gold-dim),var(--gold),var(--gold-dim),transparent);opacity:0.6;}
+
+        /* Section ghost number gets a soft glow */
+        .section-ghost{text-shadow:0 0 40px rgba(201,168,76,0.15);}
+
+        /* Closing-slide cards: tighter padding so the tagline fits below */
+        #s30 .info-card{padding:clamp(.5rem,1vw,.9rem) clamp(.6rem,1.2vw,1rem) clamp(.7rem,1.3vw,1.1rem);}
+        #s30 .info-card::after{font-size:.7rem;bottom:.25em;right:.4em;}
+
+        /* === RESPONSIVE === */
+        @media(max-height:700px){:root{--slide-padding:clamp(1rem,2.5vw,2.5rem);--content-gap:clamp(.4rem,1.2vw,1rem);--element-gap:clamp(.2rem,.6vw,.6rem);}}
+        @media(max-height:600px){:root{--slide-padding:clamp(.6rem,2vw,1.5rem);--title-size:clamp(1.2rem,4vw,2.2rem);}.chip-nav,.corner-suit{display:none;}}
+        @media(max-width:700px){.card-grid.cols-2,.card-grid.cols-3{grid-template-columns:1fr;}}
+        @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.2s!important;}html{scroll-behavior:auto;}}
+    </style>
+</head>
+<body>
+<div class="progress-bar" id="progressBar"></div>
+<nav class="chip-nav" id="chipNav"></nav>
+
+<!-- ══════ SLIDE 0 — TITLE ══════ -->
+<section class="slide slide-title" id="s0">
+    <span class="corner-suit tl">♠</span><span class="corner-suit tr">♥</span>
+    <span class="corner-suit bl">♦</span><span class="corner-suit br">♣</span>
+    <div class="bg-chips" id="bgChips"></div>
+    <div class="slide-content" style="align-items:center;text-align:center;justify-content:center;">
+        <div class="title-chip reveal d1"><div class="title-chip-inner">🪙</div></div>
+        <p class="title-eyebrow reveal d2">AI-Native Developer Workshop</p>
+        <h1 class="title-main reveal d3">All In:<br><em>Play to Win</em></h1>
+        <div class="suit-divider reveal d4">♠ ♥ ♦ ♣</div>
+        <p class="title-sub reveal d5">Instructions · Context · Agents<br>Every token is a chip. Spend them like a pro.</p>
+    </div>
+</section>
+
+<!-- ══════ SECTION I — INSTRUCTIONS ══════ -->
+<section class="slide slide-section bg-highroller" id="s1">
+    <div class="bg-chips" data-slide="1"></div>
+    <span class="section-ghost">I</span>
+    <div class="section-chip sc-bl reveal-scale d4"><div class="section-chip-inner">♣</div></div>
+    <div class="slide-content" style="justify-content:center;">
+        <p class="section-tag reveal d1">♣ Section One</p>
+        <h2 class="section-title reveal d2">Instructions</h2>
+        <p class="section-desc reveal d3">Teaching AI how you work — persistent context that shapes every interaction without repeating yourself.</p>
+    </div>
+</section>
+
+<!-- ══════ SLIDE — WHAT & WHY ══════ -->
+<section class="slide bg-blackjack" id="s2">
+    <div class="bg-chips" data-slide="2"></div>
+    <span class="slide-label"><span class="suit club">♣</span> The House Rules</span>
+    <div class="slide-content" style="gap:var(--content-gap);">
+        <div class="reveal d1">
+            <h2 class="slide-heading">Context That Persists</h2>
+            <p class="slide-subheading">Define the rules once — they apply to every hand</p>
+        </div>
+        <div class="card-grid cols-2 reveal d2" style="gap:var(--element-gap);">
+            <div class="info-card gold-border">
+                <div class="card-icon">🎯</div>
+                <div class="card-title">What Instructions Do</div>
+                <ul class="bullet-list" style="margin-top:.3em;">
+                    <li>Set coding style &amp; conventions</li>
+                    <li>Define project-specific patterns</li>
+                    <li>Specify preferred frameworks</li>
+                    <li>Establish documentation standards</li>
+                    <li>Share team knowledge with the AI</li>
+                </ul>
+            </div>
+            <div class="info-card gold-border">
+                <div class="card-icon">✨</div>
+                <div class="card-title">Why They Matter</div>
+                <ul class="bullet-list" style="margin-top:.3em;">
+                    <li>Consistent AI responses across sessions</li>
+                    <li>No need to re-explain context every prompt</li>
+                    <li>Team-wide shared understanding</li>
+                    <li>Version-controlled with your code</li>
+                    <li>Works across multiple AI agents</li>
+                </ul>
+            </div>
+        </div>
+        <div class="tip-box reveal d3"><strong>The Dealer's Edge:</strong> Good instructions reduce repeated context and let you delegate tasks with confidence.</div>
+    </div>
+</section>
+
+<!-- ══════ SLIDE — FILE TYPES ══════ -->
+<section class="slide bg-roulette" id="s3">
+    <div class="bg-chips" data-slide="3"></div>
+    <span class="slide-label"><span class="suit club">♣</span> Three Decks</span>
+    <div class="slide-content" style="gap:var(--content-gap);">
+        <div class="reveal d1">
+            <h2 class="slide-heading">Three Ways to Stack the Deck</h2>
+            <p class="slide-subheading">Instruction file types &amp; their scope</p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:var(--element-gap);">
+            <div class="info-card reveal-deal d2">
+                <div style="display:flex;align-items:center;gap:.8em;margin-bottom:.4em;flex-wrap:wrap;">
+                    <span class="snippet">.github/copilot-instructions.md</span>
+                    <span style="background:rgba(201,168,76,0.2);border:1px solid var(--border-gold);border-radius:12px;font-family:var(--font-mono);font-size:var(--small-size);padding:.1em .7em;color:var(--gold);">Global</span>
+                </div>
+                <div class="card-body">Single file — applies to <strong>all</strong> chat requests in your workspace automatically. Works in VS Code, Visual Studio, and GitHub.com.</div>
+            </div>
+            <div class="info-card reveal-deal d3">
+                <div style="display:flex;align-items:center;gap:.8em;margin-bottom:.4em;flex-wrap:wrap;">
+                    <span class="snippet">*.instructions.md</span>
+                    <span style="background:rgba(42,138,42,0.15);border:1px solid rgba(42,138,42,0.3);border-radius:12px;font-family:var(--font-mono);font-size:var(--small-size);padding:.1em .7em;color:#6dff8a;">Conditional</span>
+                </div>
+                <div class="card-body">Multiple files with <strong>glob patterns</strong> — different rules for different file types. e.g., <span class="snippet" style="font-size:.85em;">applyTo: "**/*.py"</span></div>
+            </div>
+            <div class="info-card reveal-deal d4">
+                <div style="display:flex;align-items:center;gap:.8em;margin-bottom:.4em;flex-wrap:wrap;">
+                    <span class="snippet">AGENTS.md</span>
+                    <span style="background:rgba(192,57,43,0.15);border:1px solid rgba(192,57,43,0.3);border-radius:12px;font-family:var(--font-mono);font-size:var(--small-size);padding:.1em .7em;color:#ff8a8a;">Multi-Agent</span>
+                </div>
+                <div class="card-body">Universal format for <strong>multiple AI agents</strong> — Copilot, Claude Code, Cursor. Root or subfolders for different project areas.</div>
+            </div>
+        </div>
+        <div class="tip-box reveal d5" style="font-size:var(--small-size);"><strong>Tip:</strong> All files combine when sent to the AI. Use <span class="snippet" style="font-size:.85em;">copilot-instructions.md</span> for global rules, <span class="snippet" style="font-size:.85em;">.instructions.md</span> for language-specific, and <span class="snippet" style="font-size:.85em;">AGENTS.md</span> for cross-tool compatibility.</div>
+    </div>
+</section>
+
+<!-- ══════ SLIDE — WRITING INSTRUCTIONS ══════ -->
+<section class="slide bg-poker" id="s4">
+    <div class="bg-chips" data-slide="4"></div>
+    <span class="slide-label"><span class="suit club">♣</span> Writing the Rules</span>
+    <div class="slide-content" style="gap:var(--content-gap);">
+        <div class="reveal d1">
+            <h2 class="slide-heading">Anatomy of a Good Hand</h2>
+            <p class="slide-subheading">What an effective instructions file looks like</p>
+        </div>
+        <div class="card-grid cols-2 reveal d2" style="gap:var(--element-gap);">
+            <div class="code-block">
+                <div style="color:var(--gold-dim);margin-bottom:.5em;font-size:var(--small-size);"># .github/copilot-instructions.md</div>
+                <span class="kw"># Project Guidelines</span><br><br>
+                <span class="ky">## Code Style</span><br>
+                - Use TypeScript for all new code<br>
+                - Prefer functional components<br>
+                - Use Tailwind CSS for styling<br><br>
+                <span class="ky">## Conventions</span><br>
+                - File names: kebab-case<br>
+                - Components: PascalCase<br><br>
+                <span class="ky">## Testing</span><br>
+                - Write tests for all new features<br>
+                - Use React Testing Library
+            </div>
+            <div style="display:flex;flex-direction:column;gap:var(--element-gap);">
+                <div class="info-card green-accent">
+                    <div class="card-title" style="font-size:var(--body-size);color:#6dff8a;">✅ Do</div>
+                    <ul class="bullet-list" style="margin-top:.3em;">
+                        <li>Keep instructions short &amp; specific</li>
+                        <li>Use natural language</li>
+                        <li>Organise with Markdown headers</li>
+                        <li>Include examples when helpful</li>
+                        <li>Version-control your instructions</li>
+                    </ul>
+                </div>
+                <div class="info-card red-accent">
+                    <div class="card-title" style="font-size:var(--body-size);color:#ff8a8a;">❌ Don't</div>
+                    <ul class="bullet-list" style="margin-top:.3em;">
+                        <li>Write essays — be concise</li>
+                        <li>Include sensitive information</li>
+                        <li>Contradict yourself</li>
+                        <li>Expect 100% compliance</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="tip-box reveal d3"><strong>Pro Tip:</strong> VS Code can generate instructions — use <strong>Configure Chat → Generate Chat Instructions</strong> for a codebase-aware starting point.</div>
+    </div>
+</section>
+
+<!-- ══════ SLIDE — CONDITIONAL INSTRUCTIONS ══════ -->
+<section class="slide bg-blackjack" id="s5">
+    <div class="bg-chips" data-slide="5"></div>
+    <span class="slide-label"><span class="suit club">♣</span> Conditional Bets</span>
+    <div class="slide-content" style="gap:var(--content-gap);">
+        <div class="reveal d1">
+            <h2 class="slide-heading">Different Rules for Different Tables</h2>
+            <p class="slide-subheading">applyTo — conditional instructions by file type</p>
+        </div>
+        <div class="card-grid cols-2 reveal d2" style="gap:var(--element-gap);">
+            <div class="code-block">
+                <div style="color:#6dff8a;margin-bottom:.3em;font-size:var(--small-size);">python-standards.instructions.md</div>
+                <span class="ky">---</span><br>
+                <span class="ky">applyTo</span>: <span class="st">"**/*.py"</span><br>
+                <span class="ky">description</span>: <span class="st">"Python standards"</span><br>
+                <span class="ky">---</span><br><br>
+                <span class="kw"># Python Guidelines</span><br>
+                - Follow PEP 8 style guide<br>
+                - Use type hints for all functions<br>
+                - Docstrings for public methods<br>
+                - Use pytest for testing
+            </div>
+            <div class="code-block">
+                <div style="color:#8aaeff;margin-bottom:.3em;font-size:var(--small-size);">react-components.instructions.md</div>
+                <span class="ky">---</span><br>
+                <span class="ky">applyTo</span>: <span class="st">"src/components/**/*.tsx"</span><br>
+                <span class="ky">description</span>: <span class="st">"React standards"</span><br>
+                <span class="ky">---</span><br><br>
+                <span class="kw"># React Components</span><br>
+                - Use functional components only<br>
+                - Props interface above component<br>
+                - Destructure props in signature<br>
+                - Use custom hooks for logic
+            </div>
+        </div>
+        <div class="info-card gold-border reveal d3" style="padding:clamp(.6rem,1.2vw,1rem);">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--element-gap);">
+                <div>
+                    <div style="font-family:var(--font-mono);font-size:var(--small-size);color:var(--gold-light);margin-bottom:.3em;">Workspace (project)</div>
+                    <span class="snippet">.github/instructions/</span>
+                </div>
+                <div>
+                    <div style="font-family:var(--font-mono);font-size:var(--small-size);color:var(--gold-light);margin-bottom:.3em;">User profile (all projects)</div>
+                    <span class="snippet">~/.vscode/instructions/</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══════ SLIDE — AGENTS.MD ══════ -->
+<section class="slide bg-slots" id="s6">
+    <div class="bg-chips" data-slide="6"></div>
+    <span class="slide-label"><span class="suit club">♣</span> Universal House Rules</span>
+    <div class="slide-content" style="gap:var(--content-gap);">
+        <div class="reveal d1">
+            <h2 class="slide-heading">AGENTS.md — One Card Rules All Tables</h2>
+            <p class="slide-subheading">Cross-tool instructions for Copilot, Claude Code, Cursor &amp; more</p>
+        </div>
+        <div class="card-grid cols-2 reveal d2" style="gap:var(--element-gap);">
+            <div class="code-block">
+                <div style="color:#c08aff;margin-bottom:.3em;font-size:var(--small-size);">AGENTS.md (root)</div>
+                <span class="kw"># AI Agent Instructions</span><br><br>
+                <span class="ky">## Project Overview</span><br>
+                React + TypeScript SPA<br>for workshop presentations.<br><br>
+                <span class="ky">## Code Generation Rules</span><br>
+                - Always use TypeScript<br>
+                - Prefer const over let<br>
+                - Include error handling<br><br>
+                <span class="ky">## File Structure</span><br>
+                - Slides in /src/sections/<br>
+                - Components in /src/components/
+            </div>
+            <div style="display:flex;flex-direction:column;gap:var(--element-gap);">
+                <div class="info-card gold-border">
+                    <div class="card-title" style="font-size:var(--body-size);">🔄 Cross-Tool Benefits</div>
+                    <ul class="bullet-list" style="margin-top:.3em;">
+                        <li>Same file works in VS Code &amp; Claude</li>
+                        <li>Team consistency across tools</li>
+                        <li>Easy migration between AI assistants</li>
+                        <li>One source of truth</li>
+                    </ul>
+                </div>
+                <div class="info-card gold-border">
+                    <div class="card-title" style="font-size:var(--body-size);">📂 Nested Files (Experimental)</div>
+                    <ul class="bullet-list" style="margin-top:.3em;">
+                        <li><span class="c">/frontend/AGENTS.md</span></li>
+                        <li><span class="c">/backend/AGENTS.md</span></li>
+                        <li><span class="c">/tests/AGENTS.md</span></li>
+                    </ul>
+                    <div style="font-family:var(--font-mono);font-size:var(--small-size);color:var(--text-muted);margin-top:.4em;">Enable: chat.useNestedAgentsMdFiles</div>
+                </div>
+            </div>
+        </div>
+        <div class="tip-box reveal d3"><strong>Recommendation:</strong> Use <span class="snippet" style="font-size:.85em;">AGENTS.md</span> for broad AI-agnostic rules; <span class="snippet" style="font-size:.85em;">copilot-instructions.md</span> for Copilot-specific features.</div>
+    </div>
+</section>
+
+<!-- ══════ SLIDE — CONTINUOUS IMPROVEMENT ══════ -->
+<section class="slide bg-poker" id="s7">
+    <div class="bg-chips" data-slide="7"></div>
+    <span class="slide-label"><span class="suit club">♣</span> Refine Your Play</span>
+    <div class="slide-content" style="gap:var(--content-gap);">
+        <div class="reveal d1">
+            <h2 class="slide-heading">Instructions Are a Living Deck</h2>
+            <p class="slide-subheading">Build a feedback loop — iterate every session</p>
+        </div>
+        <div class="card-grid cols-2 reveal d2" style="gap:var(--element-gap);">
+            <div class="info-card gold-border">
+                <div class="card-icon">🔄</div>
+                <div class="card-title">The Process</div>
+                <ul class="bullet-list" style="margin-top:.3em;">
+                    <li>Review outputs for deviations</li>
+                    <li>Ask the model to analyse the gap</li>
+                    <li>Update instructions iteratively</li>
+                    <li>Start from community best-practice baselines</li>
+                </ul>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:var(--element-gap);">
+                <div class="code-block" style="flex:1;">
+                    <div style="color:var(--gold-dim);margin-bottom:.4em;font-size:var(--small-size);">Feedback prompt:</div>
+                    Go through our conversation and the<br>
+                    iterations we made. Implement &amp; adjust<br>
+                    instructions to avoid these mistakes<br>
+                    in future hands.
+                </div>
+                <div class="info-card green-accent">
+                    <div class="card-title" style="font-size:var(--body-size);">✨ What You Gain</div>
+                    <ul class="bullet-list" style="margin-top:.2em;">
+                        <li>Instructions that evolve with your needs</li>
+                        <li>Reduced code-review friction</li>
+                        <li>Consistent AI output over time</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="tip-box reveal d3"><strong>Resources:</strong> <a href="https://github.com/github/awesome-copilot/tree/main/instructions" style="color:var(--gold);">github/awesome-copilot</a> has community instruction examples as a baseline.</div>
+    </div>
+</section>
+
+<!-- ══════ SECTION II — CONTEXT ENGINEERING ══════ -->
+<section class="slide slide-section bg-highroller" id="s8">
+    <div class="bg-chips" data-slide="8"></div>
+    <span class="section-ghost">II</span>
+    <div class="section-chip sc-tr reveal-scale d4"><div class="section-chip-inner" style="color:#ff8a8a;">♥</div></div>
+    <div class="slide-content" style="justify-content:center;">
+        <p class="section-tag reveal d1">♥ Section Two</p>
+        <h2 class="section-title reveal d2">Context Engineering</h2>
+        <p class="section-desc reveal d3">Understanding how AI processes information — and spending your tokens like a professional card counter.</p>
+    </div>
+</section>
+
+<!-- ══════ SLIDE — WHAT IS CE ══════ -->
+<section class="slide bg-blackjack" id="s9">
+    <div class="bg-chips" data-slide="9"></div>
+    <span class="slide-label"><span class="suit heart">♥</span> The Discipline</span>
+    <div class="slide-content" style="gap:var(--content-gap);">
+        <div class="callout-box reveal d1">
+            <blockquote>"Context engineering is the delicate art and science of filling the context window with just the right information for the next step."</blockquote>
+            <cite>— Andrej Karpathy, June 2025</cite>
+        </div>
+        <div class="card-grid cols-2 reveal d2" style="gap:var(--element-gap);">
+            <div class="info-card gold-border">
+                <div class="card-icon">🎰</div>
+                <div class="card-title">Beyond Prompt Engineering</div>
+                <ul class="bullet-list" style="margin-top:.3em;">
+                    <li>Prompt engineering: narrow focus on wording</li>
+                    <li>Context engineering: <strong>everything the model sees</strong></li>
+                    <li>Instructions, history, tools, retrieved docs, images</li>
+                </ul>
+            </div>
+            <div class="info-card gold-border">
+                <div class="card-icon">🃏</div>
+                <div class="card-title">Why It Matters</div>
+                <ul class="bullet-list" style="margin-top:.3em;">
+                    <li>Model quality is fixed — context is in your control</li>
+                    <li>Garbage in → garbage out at any model size</li>
+                    <li>Right context = dramatically better results</li>
+                </ul>
+            </div>
+        </div>
+        <div class="tip-box reveal d3"><strong>The House Rule:</strong> You can't change the deck. But you control exactly which cards go on the table. That's your edge.</div>
+    </div>
+</section>
+
+<!-- ══════ SLIDE — CONTEXT WINDOW ══════ -->
+<section class="slide bg-roulette" id="s10">
+    <div class="bg-chips" data-slide="10"></div>
+    <span class="slide-label"><span class="suit heart">♥</span> Your Stack</span>
+    <div class="slide-content" style="gap:var(--content-gap);">
+        <div class="reveal d1">
+            <h2 class="slide-heading">The Context Window is Your Stack</h2>
+            <p class="slide-subheading">Finite, shared, and burning with every turn</p>
+        </div>
+        <div class="card-grid cols-2 reveal d2" style="gap:var(--element-gap);">
+            <div class="info-card gold-border">
+                <div class="card-icon">📏</div>
+                <div class="card-title">The Practical Limit</div>
+                <div class="card-body">Determines how much conversation history, documents, or code the model can "see" simultaneously. Everything competes for the same space.</div>
+            </div>
+            <div class="info-card gold-border">
+                <div class="card-icon">📊</div>
+                <div class="card-title">Size Varies by Model</div>
+                <div class="card-body">Ranges from a few thousand tokens (early models) to millions (modern models like Claude 4). Bigger stack doesn't mean infinite — it still fills up.</div>
+            </div>
+            <div class="info-card gold-border">
+                <div class="card-icon">↔️</div>
+                <div class="card-title">Input vs. Output</div>
+                <div class="card-body">Input windows are far larger than output limits. Models can read a 500-page book but won't recite it back — and reading it costs chips.</div>
+            </div>
+            <div class="info-card gold-border">
+                <div class="card-icon">🚫</div>
+                <div class="card-title">Beyond the Window</div>
+                <div class="card-body">Information outside the context window is forgotten — like cards burned from the deck. The model can't reference them at all.</div>
+            </div>
+        </div>
+        <div class="alert-box reveal d3">⚠️ <strong style="color:inherit;">200K tokens ≈ 500-page book.</strong> Sounds huge — until every turn burns another hand.</div>
+    </div>
+</section>
+
+<!-- ══════ SLIDE — WHAT FILLS THE CONTEXT ══════ -->
+<section class="slide bg-poker" id="s11">
+    <div class="bg-chips" data-slide="11"></div>
+    <span class="slide-label"><span class="suit heart">♥</span> What's On the Table</span>
+    <div class="slide-content" style="gap:var(--content-gap);">
+        <div class="reveal d1">
+            <h2 class="slide-heading">What's Eating Your Tokens?</h2>
+            <p class="slide-subheading">Every component competes for the same felt</p>
+        </div>
+        <div class="reveal d2" style="display:flex;flex-direction:column;gap:.45em;">
+            <div style="display:flex;align-items:center;gap:.8em;">
+                <span style="font-family:var(--font-mono);font-size:var(--small-size);color:var(--text-muted);width:clamp(90px,13vw,140px);flex-shrink:0;">System Prompt</span>
+                <div class="token-bar" style="flex:1"><div class="token-bar-fill bar-system" style="width:15%">15%</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:.8em;">
+                <span style="font-family:var(--font-mono);font-size:var(--small-size);color:var(--text-muted);width:clamp(90px,13vw,140px);flex-shrink:0;">Chat History</span>
+                <div class="token-bar" style="flex:1"><div class="token-bar-fill bar-history" style="width:30%">30%</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:.8em;">
+                <span style="font-family:var(--font-mono);font-size:var(--small-size);color:var(--text-muted);width:clamp(90px,13vw,140px);flex-shrink:0;">Files / Docs</span>
+                <div class="token-bar" style="flex:1"><div class="token-bar-fill bar-files" style="width:25%">25%</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:.8em;">
+                <span style="font-family:var(--font-mono);font-size:var(--small-size);color:var(--text-muted);width:clamp(90px,13vw,140px);flex-shrink:0;">Tool Definitions</span>
+                <div class="token-bar" style="flex:1"><div class="token-bar-fill bar-tools" style="width:10%">10%</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:.8em;">
+                <span style="font-family:var(--font-mono);font-size:var(--small-size);color:var(--text-muted);width:clamp(90px,13vw,140px);flex-shrink:0;">Tool Results</span>
+                <div class="token-bar" style="flex:1"><div class="token-bar-fill bar-tools" style="width:10%">10%</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:.8em;">
+                <span style="font-family:var(--font-mono);font-size:var(--small-size);color:var(--gold);width:clamp(90px,13vw,140px);flex-shrink:0;">Your Work</span>
+                <div class="token-bar" style="flex:1"><div class="token-bar-fill bar-free" style="width:10%">10%</div></div>
+            </div>
+        </div>
+        <div class="tip-box reveal d3"><strong>💡 Insight:</strong> Every component competes for finite space. Context engineering is deciding what earns its place at the table.</div>
+    </div>
+</section>
+
+<!-- ══════ SLIDE — LOST IN THE MIDDLE ══════ -->
+<section class="slide bg-slots" id="s12">
+    <div class="bg-chips" data-slide="12"></div>
+    <span class="slide-label"><span class="suit heart">♥</span> The Dealer's Tell</span>
+    <div class="slide-content" style="gap:var(--content-gap);">
+        <div class="reveal d1">
+            <h2 class="slide-heading">Lost in the Middle</h2>
+            <p class="slide-subheading">Position matters — like seat at the poker table</p>
+        </div>
+        <div class="reveal d2">
+            <div class="attention-bars">
+                <div class="attn-bar-wrap">
+                    <div class="attn-value hv">High</div>
+                    <div class="attn-bar high" style="height:clamp(55px,11vh,100px);"></div>
+                    <div class="attn-label">Start</div>
+                    <div class="attn-label">🂡 Best seat</div>
+                </div>
+                <div class="attn-bar-wrap">
+                    <div class="attn-value lv">Low</div>
+                    <div class="attn-bar low" style="height:clamp(20px,4vh,36px);"></div>
+                    <div class="attn-label">Middle</div>
+                    <div class="attn-label">🂨 Dead money</div>
+                </div>
+                <div class="attn-bar-wrap">
+                    <div class="attn-value hv">High</div>
+                    <div class="attn-bar high" style="height:clamp(48px,9.5vh,88px);"></div>
+                    <div class="attn-label">End</div>
+                    <div class="attn-label">🂳 Button position</div>
+                </div>
+            </div>
+        </div>
+        <div class="card-grid cols-2 reveal d3" style="gap:var(--element-gap);">
+            <div class="info-card green-accent">
+                <div class="card-title" style="font-size:var(--body-size);color:#6dff8a;">✅ Play Your Strong Cards First</div>
+                <ul class="bullet-list" style="margin-top:.3em;">
+                    <li>Critical instructions at the top of system prompt</li>
+                    <li>Key data and examples near the end</li>
+                    <li>Repeat crucial constraints at closing</li>
+                </ul>
+            </div>
+            <div class="info-card red-accent">
+                <div class="card-title" style="font-size:var(--body-size);color:#ff8a8a;">❌ Don't Bury Your Aces</div>
+                <ul class="bullet-list" style="margin-top:.3em;">
+                    <li>Essential rules hidden in long middle sections</li>
+                    <li>Long filler content between key information</li>
+                    <li>Assuming the model reads everything equally</li>
+                </ul>
+            </div>
+        </div>
+        <div class="tip-box reveal d4" style="font-size:var(--small-size);"><strong>Source:</strong> arXiv:2307.03172 — "Lost in the Middle: How Language Models Use Long Contexts" (Liu et al., 2023)</div>
+    </div>
+</section>
+
+<!-- ══════ SLIDE — ACTIVATING PRE-TRAINED KNOWLEDGE ══════ -->
+<section class="slide bg-blackjack" id="s13">
+    <div class="bg-chips" data-slide="13"></div>
+    <span class="slide-label"><span class="suit heart">♥</span> The Hidden Ace</span>
+    <div class="slide-content" style="gap:var(--content-gap);">
+        <div class="callout-box reveal d1">
+            <blockquote>Models are trained on massive datasets before you write a single prompt. That knowledge lives in the weights — always present, but it may need to be explicitly activated.</blockquote>
+        </div>
+        <div class="card-grid cols-2 reveal d2" style="gap:var(--element-gap);">
+            <div class="info-card gold-border">
+                <div class="card-title" style="font-size:var(--body-size);">🧠 What Models Already Know</div>
+                <ul class="bullet-list" style="margin-top:.3em;">
+                    <li>Programming languages, frameworks, libraries</li>
+                    <li>Design patterns &amp; architectural best practices</li>
+                    <li>Domain knowledge: medicine, law, finance</li>
+                    <li>RFCs, specs, and standards documentation</li>
+                </ul>
+            </div>
+            <div class="info-card gold-border">
+                <div class="card-title" style="font-size:var(--body-size);">⚡ The Activation Phrase</div>
+                <div class="code-block" style="margin-top:.5em;">
+                    <span class="kw">Activate your knowledge about</span><br>
+                    <span class="st">SOLID principles</span><br><br>
+                    <span class="kw">Activate your knowledge about</span><br>
+                    <span class="st">OAuth 2.0 flows</span><br><br>
+                    <span class="kw">Activate your knowledge about</span><br>
+                    <span class="st">REST API design</span>
+                </div>
+            </div>
+        </div>
+        <div class="tip-box reveal d3"><strong>Pro Move:</strong> Use <span class="snippet" style="font-size:.85em;">Activate your knowledge about X</span> in your instructions to surface deep model expertise — free chips, zero extra tokens.</div>
+    </div>
+</section>
+
+<!-- ══════ SLIDE — CHAT TURNS ══════ -->
+<section class="slide bg-roulette" id="s14">
+    <div class="bg-chips" data-slide="14"></div>
+    <span class="slide-label"><span class="suit heart">♥</span> The Burning Deck</span>
+    <div class="slide-content" style="gap:var(--content-gap);">
+        <div class="reveal d1">
+            <h2 class="slide-heading">Every Turn Burns Chips</h2>
+            <p class="slide-subheading">The AI rebuilds context from scratch — every single hand</p>
+        </div>
+        <div class="reveal d2" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--element-gap);">
+            <div class="info-card" style="padding:clamp(.5rem,1vw,.9rem);">
+                <div style="font-family:var(--font-mono);font-size:var(--small-size);color:var(--gold);margin-bottom:.4em;text-align:center;">Turn 1</div>
+                <div style="display:flex;flex-direction:column;gap:3px;">
+                    <div style="background:#1a3a1a;border:1px solid #2a6a2a;border-radius:3px;padding:3px 6px;font-family:var(--font-mono);font-size:.6em;color:#6dff8a;">System Prompt</div>
+                    <div style="background:#1a2a3a;border:1px solid #2a4a6a;border-radius:3px;padding:3px 6px;font-family:var(--font-mono);font-size:.6em;color:#8aaeff;">Context / Files</div>
+                    <div style="background:#3a1a08;border:1px solid #6a3a18;border-radius:3px;padding:3px 6px;font-family:var(--font-mono);font-size:.6em;color:#ffa060;">User Prompt 1</div>
+                    <div style="background:#3a1a08;border:1px solid #6a3a18;border-radius:3px;padding:3px 6px;font-family:var(--font-mono);font-size:.6em;color:#ffa060;">Response 1</div>
+                </div>
+            </div>
+            <div class="info-card" style="padding:clamp(.5rem,1vw,.9rem);">
+                <div style="font-family:var(--font-mono);font-size:var(--small-size);color:var(--gold);margin-bottom:.4em;text-align:center;">Turn 2</div>
+                <div style="display:flex;flex-direction:column;gap:3px;">
+                    <div style="background:#1a3a1a;border:1px solid #2a6a2a;border-radius:3px;padding:3px 6px;font-family:var(--font-mono);font-size:.6em;color:#6dff8a;">System Prompt</div>
+                    <div style="background:#1a2a3a;border:1px solid #2a4a6a;border-radius:3px;padding:3px 6px;font-family:var(--font-mono);font-size:.6em;color:#8aaeff;">Context / Files</div>
+                    <div style="background:#3a1a08;border:1px solid #6a3a18;border-radius:3px;padding:3px 6px;font-family:var(--font-mono);font-size:.6em;color:#ffa060;">User Prompt 1</div>
+                    <div style="background:#3a1a08;border:1px solid #6a3a18;border-radius:3px;padding:3px 6px;font-family:var(--font-mono);font-size:.6em;color:#ffa060;">Response 1</div>
+                    <div style="background:#1a1a3a;border:1px solid #3a3a7a;border-radius:3px;padding:3px 6px;font-family:var(--font-mono);font-size:.6em;color:#c08aff;">User Prompt 2</div>
+                    <div style="background:#1a1a3a;border:1px solid #3a3a7a;border-radius:3px;padding:3px 6px;font-family:var(--font-mono);font-size:.6em;color:#c08aff;">Response 2</div>
+                </div>
+            </div>
+            <div class="info-card red-accent" style="padding:clamp(.5rem,1vw,.9rem);">
+                <div style="font-family:var(--font-mono);font-size:var(--small-size);color:#ff8a8a;margin-bottom:.4em;text-align:center;">Turn 3 ⚠️</div>
+                <div style="display:flex;flex-direction:column;gap:3px;">
+                    <div style="background:#1a3a1a;border:1px solid #2a6a2a;border-radius:3px;padding:3px 6px;font-family:var(--font-mono);font-size:.6em;color:#6dff8a;">System Prompt</div>
+                    <div style="background:#1a2a3a;border:1px solid #2a4a6a;border-radius:3px;padding:3px 6px;font-family:var(--font-mono);font-size:.6em;color:#8aaeff;">Context / Files</div>
+                    <div style="background:#3a1a08;border:1px solid #6a3a18;border-radius:3px;padding:3px 6px;font-family:var(--font-mono);font-size:.6em;color:#ffa060;">Prompt 1 + Resp 1</div>
+                    <div style="background:#1a1a3a;border:1px solid #3a3a7a;border-radius:3px;padding:3px 6px;font-family:var(--font-mono);font-size:.6em;color:#c08aff;">Prompt 2 + Resp 2</div>
+                    <div style="background:#2a0808;border:1px solid #7a1a1a;border-radius:3px;padding:3px 6px;font-family:var(--font-mono);font-size:.6em;color:#ff6b6b;">Prompt 3 + Resp 3</div>
+                    <div style="background:#2a0808;border:1px solid rgba(192,57,43,0.5);border-radius:3px;padding:3px 6px;font-family:var(--font-mono);font-size:.6em;color:#ff4040;text-align:center;">🔴 STACK FULL</div>
+                </div>
+            </div>
+        </div>
+        <div class="card-grid cols-2 reveal d3" style="gap:var(--element-gap);">
+            <div class="tip-box"><strong>Insight:</strong> Long conversations hit limits fast. Verbose responses burn chips faster.</div>
+            <div class="tip-box"><strong>Rule:</strong> When quality degrades, start a fresh hand — don't keep re-raising a losing stack.</div>
+        </div>
+    </div>
+</section>
+
+<!-- ══════ SLIDE — COMPRESSION ══════ -->
+<section class="slide bg-poker" id="s15">
+    <div class="bg-chips" data-slide="15"></div>
+    <span class="slide-label"><span class="suit heart">♥</span> Counting Your Outs</span>
+    <div class="slide-content" style="gap:var(--content-gap);">
+        <div class="reveal d1">
+            <h2 class="slide-heading">Managing Your Stack</h2>
+            <p class="slide-subheading">Context compression strategies</p>
+        </div>
+        <div class="card-grid cols-2 reveal d2" style="gap:var(--element-gap);">
+            <div class="info-card gold-border">
+                <div class="card-icon">🗜️</div>
+                <div class="card-title">Summarize the History</div>
+                <div class="card-body">Ask AI to summarize the conversation. Start a new hand with the summary as your opening bet. Retains key decisions without the full history.</div>
+            </div>
+            <div class="info-card gold-border">
+                <div class="card-icon">✂️</div>
+                <div class="card-title">Selective Context</div>
+                <div class="card-body">Only attach files relevant to the current task. Use <span class="snippet" style="font-size:.85em;">#file</span> and <span class="snippet" style="font-size:.85em;">@workspace</span> selectively. Remove what you no longer need.</div>
+            </div>
+            <div class="info-card gold-border">
+                <div class="card-icon">⚡</div>
+                <div class="card-title">Prompt Caching</div>
+                <div class="card-body">Cache static portions — system prompts, large docs. Reduces cost and latency. The house charges less when you cache. Supported by Anthropic and OpenAI.</div>
+            </div>
+            <div class="info-card gold-border">
+                <div class="card-icon">🔄</div>
+                <div class="card-title">Agentic Compacting</div>
+                <div class="card-body"><span class="snippet" style="font-size:.85em;">/compact</span> in Copilot CLI. Claude Code auto-compacts at 95% context usage. Let the dealer shuffle for you when the deck runs thin.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══════ SLIDE — SIGNAL TO NOISE ══════ -->
+<section class="slide bg-slots" id="s16">
+    <div class="bg-chips" data-slide="16"></div>
+    <span class="slide-label"><span class="suit heart">♥</span> Bad Hands</span>
+    <div class="slide-content" style="gap:var(--content-gap);">
+        <div class="reveal d1">
+            <h2 class="slide-heading">The Signal-to-Noise Problem</h2>
+            <p class="slide-subheading">Raw HTML is a bluff — don't call it</p>
+        </div>
+        <div class="card-grid cols-2 reveal d2" style="gap:var(--element-gap);">
+            <div class="info-card red-accent">
+                <div style="display:flex;align-items:center;gap:.5em;margin-bottom:.5em;">
+                    <span style="font-size:clamp(1.2rem,2vw,1.6rem);">📄</span>
+                    <div class="card-title" style="color:#ff8a8a;">Raw HTML</div>
+                </div>
+                <div class="token-bar" style="margin-bottom:.5em;">
+                    <div class="token-bar-fill bar-history" style="width:90%;justify-content:flex-end;padding-right:4px;">Noise 90%</div>
+                    <div class="token-bar-fill bar-system" style="width:10%;">10%</div>
+                </div>
+                <div style="font-family:var(--font-mono);font-size:var(--small-size);color:var(--text-muted);">80K+ tokens per page — CSS, JS, comments, junk</div>
+            </div>
+            <div class="info-card gold-border">
+                <div style="display:flex;align-items:center;gap:.5em;margin-bottom:.5em;">
+                    <span style="font-size:clamp(1.2rem,2vw,1.6rem);">✨</span>
+                    <div class="card-title">Preprocessed Markdown</div>
+                </div>
+                <div class="token-bar" style="margin-bottom:.5em;">
+                    <div class="token-bar-fill bar-system" style="width:80%;">Signal 80%</div>
+                    <div class="token-bar-fill bar-tools" style="width:20%;">Structure</div>
+                </div>
+                <div style="font-family:var(--font-mono);font-size:var(--small-size);color:var(--text-secondary);">Clean content — maximum signal per chip spent</div>
+            </div>
+        </div>
+        <div class="info-card gold-border reveal d3" style="padding:clamp(.6rem,1.2vw,1rem);">
+            <div class="card-title" style="font-size:var(--body-size);margin-bottom:.5em;">🛠️ Preprocessing Tools — The Chip Cleaning Station</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--element-gap);">
+                <div>
+                    <div style="font-family:var(--font-mono);font-size:var(--small-size);color:var(--gold-light);margin-bottom:.2em;">Zero-Config APIs</div>
+                    <ul class="bullet-list">
+                        <li><span class="c">r.jina.ai/&lt;url&gt;</span> — free, zero setup</li>
+                        <li><span class="c">firecrawl.dev</span> — full-site pipelines</li>
+                    </ul>
+                </div>
+                <div>
+                    <div style="font-family:var(--font-mono);font-size:var(--small-size);color:var(--gold-light);margin-bottom:.2em;">CLI Tools</div>
+                    <ul class="bullet-list">
+                        <li><span class="c">gitingest.com</span> — repo to prompt</li>
+                        <li><span class="c">markitdown</span> — Office docs → MD</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══════ SLIDE — SCOPED INSTRUCTIONS ══════ -->
+<section class="slide bg-blackjack" id="s17">
+    <div class="bg-chips" data-slide="17"></div>
+    <span class="slide-label"><span class="suit heart">♥</span> Bet Sizing</span>
+    <div class="slide-content" style="gap:var(--content-gap);">
+        <div class="reveal d1">
+            <h2 class="slide-heading">Bet Sizing Your Instructions</h2>
+            <p class="slide-subheading">Scoped context — only load what you need</p>
+        </div>
+        <div class="reveal d2" style="background:var(--bg-card);border:1px solid var(--border-felt);border-radius:8px;padding:clamp(.8rem,1.5vw,1.4rem);">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--element-gap);align-items:center;">
+                <div>
+                    <div style="font-family:var(--font-mono);font-size:var(--small-size);color:#ff8a8a;margin-bottom:.4em;">❌ Unscoped — All In Every Hand</div>
+                    <div class="token-bar"><div class="token-bar-fill bar-history" style="width:60%;font-size:.7em;">All Instructions</div><div class="token-bar-fill bar-files" style="width:20%;">Context</div><div class="token-bar-fill bar-free" style="width:20%;">Work</div></div>
+                </div>
+                <div>
+                    <div style="font-family:var(--font-mono);font-size:var(--small-size);color:#6dff8a;margin-bottom:.4em;">✓ Scoped — Precise Bet</div>
+                    <div class="token-bar"><div class="token-bar-fill bar-system" style="width:15%;font-size:.7em;">Relevant</div><div class="token-bar-fill bar-files" style="width:25%;">Context</div><div class="token-bar-fill bar-free" style="width:60%;">Your Work</div></div>
+                </div>
+            </div>
+        </div>
+        <div class="card-grid cols-2 reveal d3" style="gap:var(--element-gap);">
+            <div class="info-card">
+                <div class="card-title" style="font-size:var(--body-size);">📁 Scope by File Type</div>
+                <div class="code-block" style="margin-top:.4em;">
+                    <span class="ky">applyTo</span>: <span class="st">"**/*.go"</span> <span class="cm">→ Go only</span><br>
+                    <span class="ky">applyTo</span>: <span class="st">"**/*.ts"</span> <span class="cm">→ TypeScript</span><br>
+                    <span class="ky">applyTo</span>: <span class="st">"**/*.test.*"</span> <span class="cm">→ Tests</span>
+                </div>
+            </div>
+            <div class="info-card">
+                <div class="card-title" style="font-size:var(--body-size);">📂 Scope by Directory</div>
+                <div class="code-block" style="margin-top:.4em;">
+                    <span class="st">/api/</span><span class="kw">AGENTS.md</span> <span class="cm">→ API layer</span><br>
+                    <span class="st">/ui/</span><span class="kw">AGENTS.md</span> <span class="cm">→ Frontend</span><br>
+                    <span class="st">/db/</span><span class="kw">AGENTS.md</span> <span class="cm">→ Database</span>
+                </div>
+            </div>
+        </div>
+        <div class="tip-box reveal d4"><strong>Rule:</strong> Put verbose instructions in scoped files. Keep root minimal — it's always in play.</div>
+    </div>
+</section>
+
+<!-- ══════ SLIDE — CODEBASE ARCHITECTURE ══════ -->
+<section class="slide bg-poker" id="s18">
+    <div class="bg-chips" data-slide="18"></div>
+    <span class="slide-label"><span class="suit heart">♥</span> Clean Tables</span>
+    <div class="slide-content" style="gap:var(--content-gap);">
+        <div class="reveal d1">
+            <h2 class="slide-heading">A Clean Table Runs Faster</h2>
+            <p class="slide-subheading">Codebase architecture directly impacts AI effectiveness</p>
+        </div>
+        <div class="card-grid cols-2 reveal d2" style="gap:var(--element-gap);">
+            <div class="info-card red-accent">
+                <div class="card-title" style="color:#ff8a8a;font-size:var(--body-size);">❌ Monolithic Files — Messy Table</div>
+                <div class="token-bar" style="margin:.4em 0;"><div class="token-bar-fill bar-history" style="width:80%;">File Noise (3000 lines)</div><div class="token-bar-fill bar-system" style="width:20%;">50 needed</div></div>
+                <ul class="bullet-list" style="margin-top:.3em;">
+                    <li><strong>God Classes:</strong> 2000+ line files</li>
+                    <li><strong>Mixed Concerns:</strong> Logic + UI + data in one</li>
+                    <li><strong>Deep Nesting:</strong> 6+ levels of logic</li>
+                </ul>
+            </div>
+            <div class="info-card gold-border">
+                <div class="card-title" style="font-size:var(--body-size);">✅ Modular Files — Tidy Table</div>
+                <div class="token-bar" style="margin:.4em 0;"><div class="token-bar-fill bar-system" style="width:15%;">File</div><div class="token-bar-fill bar-files" style="width:30%;">Context</div><div class="token-bar-fill bar-free" style="width:55%;">AI has room</div></div>
+                <ul class="bullet-list" style="margin-top:.3em;">
+                    <li><strong>Single Responsibility:</strong> 100–300 lines</li>
+                    <li><strong>Clear Separation:</strong> Layers isolated</li>
+                    <li><strong>Interface Abstractions:</strong> Hide complexity</li>
+                </ul>
+            </div>
+        </div>
+        <div class="callout-box reveal d3">
+            <blockquote style="font-size:var(--body-size);">Well-architected code = dramatically more effective AI. Small, focused files = maximum context efficiency per chip spent.</blockquote>
+        </div>
+    </div>
+</section>
+
+<!-- ══════ SECTION III — AGENTS & SKILLS ══════ -->
+<section class="slide slide-section bg-highroller" id="s19">
+    <div class="bg-chips" data-slide="19"></div>
+    <span class="section-ghost">III</span>
+    <div class="section-chip sc-bl reveal-scale d4"><div class="section-chip-inner">♠</div></div>
+    <div class="slide-content" style="justify-content:center;">
+        <p class="section-tag reveal d1">♠ Section Three</p>
+        <h2 class="section-title reveal d2">Agents &amp; Skills</h2>
+        <p class="section-desc reveal d3">Prompt files, custom agents, and agent skills — stop repeating yourself and start delegating like a pit boss.</p>
+    </div>
+</section>
+
+<!-- ══════ SLIDE — PROMPT FILES ══════ -->
+<!-- ══════ SLIDE — CUSTOM AGENTS ══════ -->
+<section class="slide bg-blackjack" id="s21">
+    <div class="bg-chips" data-slide="21"></div>
+    <span class="slide-label"><span class="suit spade">♠</span> Specialist Dealers</span>
+    <div class="slide-content" style="gap:var(--content-gap);">
+        <div class="reveal d1">
+            <h2 class="slide-heading">Custom Agents — Specialist Dealers</h2>
+            <p class="slide-subheading">Specialized AI personas for specific development roles</p>
+        </div>
+        <div class="card-grid cols-2 reveal d2" style="gap:var(--element-gap);">
+            <div class="info-card gold-border">
+                <div class="card-icon">🤖</div>
+                <div class="card-title">File Structure (.agent.md)</div>
+                <ul class="bullet-list" style="margin-top:.3em;">
+                    <li>YAML frontmatter: name, description, tools, handoffs</li>
+                    <li>Markdown body with agent-specific instructions</li>
+                    <li>Restrict tools per agent (e.g., read-only for planners)</li>
+                </ul>
+            </div>
+            <div class="info-card gold-border">
+                <div class="card-icon">🔄</div>
+                <div class="card-title">Handoffs Between Agents</div>
+                <ul class="bullet-list" style="margin-top:.3em;">
+                    <li>Create guided workflows between agents</li>
+                    <li>Handoff buttons appear after responses complete</li>
+                    <li>Example: Planner → Implementation → Review</li>
+                    <li>Pre-filled prompts with relevant context</li>
+                </ul>
+            </div>
+        </div>
+        <div class="info-card gold-border reveal d3">
+            <div class="card-title" style="font-size:var(--body-size);margin-bottom:.5em;">💡 Example Agents</div>
+            <div style="display:flex;justify-content:space-around;font-size:var(--body-size);color:var(--text-secondary);">
+                <div style="text-align:center;"><span style="font-size:1.5em;">📋</span><div>Planner</div><div style="font-family:var(--font-mono);font-size:var(--small-size);color:var(--text-muted);">Read-only</div></div>
+                <div style="text-align:center;"><span style="font-size:1.5em;">🔍</span><div>Reviewer</div><div style="font-family:var(--font-mono);font-size:var(--small-size);color:var(--text-muted);">Security</div></div>
+                <div style="text-align:center;"><span style="font-size:1.5em;">🏗️</span><div>Implementer</div><div style="font-family:var(--font-mono);font-size:var(--small-size);color:var(--text-muted);">Full access</div></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══════ SLIDE — WHERE TO STORE AGENTS ══════ -->
+<section class="slide bg-slots" id="s22">
+    <div class="bg-chips" data-slide="22"></div>
+    <span class="slide-label"><span class="suit spade">♠</span> Which Pit</span>
+    <div class="slide-content" style="gap:var(--content-gap);">
+        <div class="reveal d1">
+            <h2 class="slide-heading">Which Pit You Play In</h2>
+            <p class="slide-subheading">Where you put the file determines who can use the agent</p>
+        </div>
+        <div class="card-grid cols-2 reveal d2" style="gap:var(--element-gap);">
+            <div class="info-card purple-accent">
+                <div class="card-icon">🟣</div>
+                <div class="card-title" style="color:#c08aff;">GitHub Copilot</div>
+                <ul class="bullet-list" style="margin-top:.3em;">
+                    <li><strong>Repo:</strong> <span class="c">.github/agents/name.md</span></li>
+                    <li><strong>Org/Enterprise:</strong> <span class="c">/agents/name.md</span> in <span class="c">.github-private</span> repo</li>
+                </ul>
+                <div style="margin-top:.6em;font-family:var(--font-mono);font-size:var(--small-size);color:var(--text-muted);">docs.github.com → Copilot → Custom Agents</div>
+            </div>
+            <div class="info-card blue-accent">
+                <div class="card-icon">🔵</div>
+                <div class="card-title" style="color:#8aaeff;">Claude Code</div>
+                <ul class="bullet-list" style="margin-top:.3em;">
+                    <li><strong>Project:</strong> <span class="c">.claude/agents/name.md</span></li>
+                    <li><strong>User:</strong> <span class="c">~/.claude/agents/name.md</span></li>
+                    <li><strong>Org:</strong> Managed settings (admin console)</li>
+                </ul>
+                <div style="margin-top:.6em;font-family:var(--font-mono);font-size:var(--small-size);color:var(--text-muted);">code.claude.com/docs → Sub-agents</div>
+            </div>
+        </div>
+        <div class="tip-box reveal d3"><strong>Pro Tip:</strong> Commit <span class="snippet" style="font-size:.85em;">.github/agents/</span> or <span class="snippet" style="font-size:.85em;">.claude/agents/</span> to version control — your whole team shares and improves the same agents.</div>
+    </div>
+</section>
+
+<!-- ══════ SLIDE — AGENT FRONTMATTER ══════ -->
+<section class="slide bg-poker" id="s23">
+    <div class="bg-chips" data-slide="23"></div>
+    <span class="slide-label"><span class="suit spade">♠</span> The Agent's Profile</span>
+    <div class="slide-content" style="gap:var(--content-gap);">
+        <div class="reveal d1">
+            <h2 class="slide-heading">Configuring Your Dealer</h2>
+            <p class="slide-subheading">.claude/agents/name.md — YAML frontmatter + system prompt body</p>
+        </div>
+        <div class="card-grid cols-2 reveal d2" style="gap:var(--element-gap);">
+            <div class="code-block">
+                <span class="ky">---</span><br>
+                <span class="ky">name</span>: <span class="st">code-reviewer</span><br>
+                <span class="ky">description</span>: <span class="st">Reviews code quality</span><br>
+                <span class="ky">tools</span>: <span class="vl">Read, Grep, Glob</span><br>
+                <span class="ky">model</span>: <span class="vl">haiku</span><br>
+                <span class="ky">permissionMode</span>: <span class="vl">plan</span><br>
+                <span class="ky">color</span>: <span class="vl">blue</span><br>
+                <span class="ky">---</span><br>
+                <span class="kw">You are a code reviewer...</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:var(--element-gap);">
+                <div class="info-card gold-border">
+                    <div class="card-title" style="font-size:var(--body-size);">🔧 Tools &amp; Permissions</div>
+                    <ul class="bullet-list" style="margin-top:.3em;">
+                        <li><span class="c">tools</span> — allowlist (inherits all if omitted)</li>
+                        <li><span class="c">disallowedTools</span> — denylist</li>
+                        <li><span class="c">permissionMode</span> — default / acceptEdits / auto / plan</li>
+                    </ul>
+                </div>
+                <div class="info-card gold-border">
+                    <div class="card-title" style="font-size:var(--body-size);">⚙️ Behaviour</div>
+                    <ul class="bullet-list" style="margin-top:.3em;">
+                        <li><span class="c">model</span> — sonnet / opus / haiku / inherit</li>
+                        <li><span class="c">maxTurns</span> — cap on agentic turns</li>
+                        <li><span class="c">isolation</span> — <span class="c">worktree</span> for git isolation</li>
+                        <li><span class="c">memory</span> — user / project / local</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="tip-box reveal d3" style="font-size:var(--small-size);"><strong>Learn More:</strong> code.claude.com/docs/en/sub-agents</div>
+    </div>
+</section>
+
+<!-- ══════ SLIDE — AGENT SCOPE & USAGE ══════ -->
+<section class="slide bg-roulette" id="s24">
+    <div class="bg-chips" data-slide="24"></div>
+    <span class="slide-label"><span class="suit spade">♠</span> The Delegation Game</span>
+    <div class="slide-content" style="gap:var(--content-gap);">
+        <div class="reveal d1">
+            <h2 class="slide-heading">How the Pit Boss Delegates</h2>
+            <p class="slide-subheading">The AI reads descriptions and assigns tasks automatically</p>
+        </div>
+        <div class="card-grid cols-2 reveal d2" style="gap:var(--element-gap);">
+            <div class="info-card gold-border">
+                <div class="card-title" style="font-size:var(--body-size);">📂 Storage Scope (by priority)</div>
+                <ul class="bullet-list" style="margin-top:.3em;">
+                    <li><strong>1.</strong> Managed settings — org-wide</li>
+                    <li><strong>2.</strong> <span class="c">--agents</span> CLI flag — session only</li>
+                    <li><strong>3.</strong> <span class="c">.claude/agents/</span> — current project ✅</li>
+                    <li><strong>4.</strong> <span class="c">~/.claude/agents/</span> — all your projects</li>
+                    <li><strong>5.</strong> Plugin <span class="c">agents/</span> — where plugin is enabled</li>
+                </ul>
+            </div>
+            <div class="info-card gold-border">
+                <div class="card-title" style="font-size:var(--body-size);">🛠️ Managing Subagents</div>
+                <ul class="bullet-list" style="margin-top:.3em;">
+                    <li><span class="c">/agents</span> — interactive UI to create/edit/delete</li>
+                    <li><span class="c">claude agents</span> — list all from CLI</li>
+                    <li><strong>Running</strong> tab: view live agents, stop them</li>
+                </ul>
+                <div style="margin-top:.5em;">
+                    <div style="font-family:var(--font-mono);font-size:var(--small-size);color:var(--gold-light);margin-bottom:.3em;">🏗️ Built-in Agents</div>
+                    <ul class="bullet-list">
+                        <li><strong>Explore</strong> — Haiku, read-only code search</li>
+                        <li><strong>Plan</strong> — read-only planning agent</li>
+                        <li><strong>General Purpose</strong> — all tools</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="tip-box reveal d3"><strong>Key:</strong> Write clear, specific <span class="snippet" style="font-size:.85em;">description</span> fields — that's how the AI decides which agent to delegate to automatically.</div>
+    </div>
+</section>
+
+<!-- ══════ SLIDE — AGENT SKILLS ══════ -->
+<section class="slide bg-blackjack" id="s25">
+    <div class="bg-chips" data-slide="25"></div>
+    <span class="slide-label"><span class="suit spade">♠</span> House Skills</span>
+    <div class="slide-content" style="gap:var(--content-gap);">
+        <div class="reveal d1">
+            <h2 class="slide-heading">Agent Skills — The House Training Manual</h2>
+            <p class="slide-subheading">Folders of instructions &amp; resources — injected automatically when relevant</p>
+        </div>
+        <div class="info-card gold-border reveal d2">
+            <div class="card-title" style="font-size:var(--body-size);margin-bottom:.5em;">🎯 Key Features</div>
+            <ul class="bullet-list">
+                <li>Open standard hosted at <strong>github.com/agentskills/agentskills</strong></li>
+                <li>Works with Copilot coding agent, GitHub Copilot CLI, and VS Code Insiders</li>
+                <li>Create your own or use community skills</li>
+                <li>Examples at <strong>anthropics/skills</strong> and <strong>github/awesome-copilot</strong></li>
+                <li>Browse and discover skills at <strong>skillsmp.com</strong></li>
+            </ul>
+        </div>
+        <div class="card-grid cols-2 reveal d3" style="gap:var(--element-gap);">
+            <div class="alert-box" style="display:flex;align-items:flex-start;gap:.8em;">
+                <span style="font-size:1.3em;flex-shrink:0;">⚠️</span>
+                <div>
+                    <div style="font-weight:700;margin-bottom:.2em;">Enable in VS Code settings:</div>
+                    <span class="snippet">"chat.useAgentSkills": true</span>
+                </div>
+            </div>
+            <div class="tip-box"><strong>Key Takeaway:</strong> Skills are reusable, shareable expertise that the AI activates automatically when it recognises the task type.</div>
+        </div>
+    </div>
+</section>
+
+<!-- ══════ SLIDE — SKILLS vs INSTRUCTIONS ══════ -->
+<section class="slide bg-slots" id="s26">
+    <div class="bg-chips" data-slide="26"></div>
+    <span class="slide-label"><span class="suit spade">♠</span> Two Types of Chips</span>
+    <div class="slide-content" style="gap:var(--content-gap);">
+        <div class="reveal d1">
+            <h2 class="slide-heading">Skills vs Custom Instructions</h2>
+            <p class="slide-subheading">When to use each approach</p>
+        </div>
+        <div class="card-grid cols-2 reveal d2" style="gap:var(--element-gap);">
+            <div class="info-card green-accent">
+                <div class="card-icon">📝</div>
+                <div class="card-title" style="color:#6dff8a;">Custom Instructions</div>
+                <div class="card-body" style="margin-bottom:.5em;font-style:italic;">Simple guidelines for every task</div>
+                <ul class="bullet-list">
+                    <li>Coding standards</li>
+                    <li>Style preferences</li>
+                    <li>General conventions</li>
+                </ul>
+            </div>
+            <div class="info-card purple-accent">
+                <div class="card-icon">🎯</div>
+                <div class="card-title" style="color:#c08aff;">Agent Skills</div>
+                <div class="card-body" style="margin-bottom:.5em;font-style:italic;">Detailed context when relevant</div>
+                <ul class="bullet-list">
+                    <li>Testing workflows</li>
+                    <li>Deployment procedures</li>
+                    <li>Debugging guides</li>
+                </ul>
+            </div>
+        </div>
+        <div class="info-card gold-border reveal d3">
+            <div class="card-title" style="font-size:var(--body-size);margin-bottom:.4em;">🤝 Working Together</div>
+            <ul class="bullet-list">
+                <li>Skills are currently repository-level only</li>
+                <li>Both teach the AI how to work in your codebase</li>
+                <li>Instructions always active; skills injected on demand when matched</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- ══════ SLIDE — CREATING A SKILL ══════ -->
+<section class="slide bg-poker" id="s27">
+    <div class="bg-chips" data-slide="27"></div>
+    <span class="slide-label"><span class="suit spade">♠</span> Dealing a New Hand</span>
+    <div class="slide-content" style="gap:var(--content-gap);">
+        <div class="reveal d1">
+            <h2 class="slide-heading">Creating an Agent Skill</h2>
+            <p class="slide-subheading">The SKILL.md file structure</p>
+        </div>
+        <div class="card-grid cols-2 reveal d2" style="gap:var(--element-gap);">
+            <div class="code-block">
+                <div style="color:var(--gold-dim);margin-bottom:.5em;font-size:var(--small-size);">Directory Structure</div>
+                <span class="kw">.github/skills/webapp-testing/</span><br>
+                <span class="st">  SKILL.md</span><br>
+                <span class="st">  example_test.js</span><br>
+                <span class="st">  debug_script.sh</span><br><br>
+                <span class="cm"># Also supported:</span><br>
+                <span class="kw">.claude/skills/webapp-testing/</span><br>
+                <span class="st">  SKILL.md</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:var(--element-gap);">
+                <div class="info-card gold-border">
+                    <div class="card-title" style="font-size:var(--body-size);">📍 Location &amp; Naming</div>
+                    <ul class="bullet-list" style="margin-top:.3em;">
+                        <li>Store in <span class="c">.github/skills</span> or <span class="c">.claude/skills</span></li>
+                        <li>Each skill in its own subdirectory</li>
+                        <li>Use lowercase names with hyphens</li>
+                        <li>Must contain a <span class="c">SKILL.md</span> file</li>
+                    </ul>
+                </div>
+                <div class="info-card gold-border">
+                    <div class="card-title" style="font-size:var(--body-size);">➕ Optional Additions</div>
+                    <ul class="bullet-list" style="margin-top:.3em;">
+                        <li>Scripts, examples, or other resources</li>
+                        <li>Test files or configuration templates</li>
+                        <li>Example outputs for the AI to follow</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══════ SLIDE — SKILL.MD FORMAT ══════ -->
+<section class="slide bg-roulette" id="s28">
+    <div class="bg-chips" data-slide="28"></div>
+    <span class="slide-label"><span class="suit spade">♠</span> The Playbook Format</span>
+    <div class="slide-content" style="gap:var(--content-gap);">
+        <div class="reveal d1">
+            <h2 class="slide-heading">SKILL.md — Anatomy of a Playbook</h2>
+            <p class="slide-subheading">YAML frontmatter required + Markdown body with instructions</p>
+        </div>
+        <div class="card-grid cols-2 reveal d2" style="gap:var(--element-gap);">
+            <div class="code-block">
+                <span class="ky">---</span><br>
+                <span class="ky">name</span>: <span class="st">webapp-testing</span><br>
+                <span class="ky">description</span>: <span class="st">Use when writing or</span><br>
+                <span class="st">  running tests for the webapp.</span><br>
+                <span class="st">  Covers unit, integration &amp; e2e.</span><br>
+                <span class="ky">license</span>: <span class="vl">MIT</span><br>
+                <span class="ky">---</span><br><br>
+                <span class="kw"># Webapp Testing Guide</span><br><br>
+                - Use Vitest for unit tests<br>
+                - Playwright for e2e flows<br>
+                - Always mock external APIs<br>
+                - Coverage threshold: 80%
+            </div>
+            <div style="display:flex;flex-direction:column;gap:var(--element-gap);">
+                <div class="info-card gold-border">
+                    <div class="card-title" style="font-size:var(--body-size);">📋 YAML Frontmatter (Required)</div>
+                    <ul class="bullet-list" style="margin-top:.3em;">
+                        <li><strong>name:</strong> lowercase identifier with hyphens</li>
+                        <li><strong>description:</strong> what it does and <em>when to use it</em></li>
+                        <li><strong>license:</strong> optional license information</li>
+                    </ul>
+                </div>
+                <div class="info-card gold-border">
+                    <div class="card-title" style="font-size:var(--body-size);">📝 Markdown Body</div>
+                    <ul class="bullet-list" style="margin-top:.3em;">
+                        <li>Detailed instructions and guidelines</li>
+                        <li>Code examples and best practices</li>
+                        <li>Step-by-step procedures</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="tip-box reveal d3"><strong>Remember:</strong> A well-written <span class="snippet" style="font-size:.85em;">description</span> is the key to automatic activation — it's what the AI matches against your request.</div>
+    </div>
+</section>
+
+<!-- ══════ SLIDE — HOW AI USES SKILLS ══════ -->
+<section class="slide bg-blackjack" id="s29">
+    <div class="bg-chips" data-slide="29"></div>
+    <span class="slide-label"><span class="suit spade">♠</span> Automatic Activation</span>
+    <div class="slide-content" style="gap:var(--content-gap);">
+        <div class="reveal d1">
+            <h2 class="slide-heading">The Pit Boss Reads the Table</h2>
+            <p class="slide-subheading">How Copilot / Claude decides which skill to inject</p>
+        </div>
+        <div class="info-card gold-border reveal d2">
+            <div class="card-title" style="font-size:var(--body-size);margin-bottom:.5em;">🔄 Selection Process</div>
+            <div style="display:flex;align-items:center;gap:clamp(.4rem,1.5vw,1rem);flex-wrap:wrap;">
+                <div style="flex:1;min-width:70px;text-align:center;background:rgba(201,168,76,0.06);border:1px solid var(--border-felt);border-radius:6px;padding:.5em;">
+                    <div style="font-size:1.2em;margin-bottom:.2em;">📝</div>
+                    <div style="font-family:var(--font-mono);font-size:var(--small-size);color:var(--gold-light);">Your Prompt</div>
+                </div>
+                <div style="color:var(--gold-dim);font-size:1.3em;flex-shrink:0;">→</div>
+                <div style="flex:1;min-width:70px;text-align:center;background:rgba(201,168,76,0.06);border:1px solid var(--border-felt);border-radius:6px;padding:.5em;">
+                    <div style="font-size:1.2em;margin-bottom:.2em;">🔍</div>
+                    <div style="font-family:var(--font-mono);font-size:var(--small-size);color:var(--gold-light);">Match Descriptions</div>
+                </div>
+                <div style="color:var(--gold-dim);font-size:1.3em;flex-shrink:0;">→</div>
+                <div style="flex:1;min-width:70px;text-align:center;background:rgba(201,168,76,0.06);border:1px solid var(--border-felt);border-radius:6px;padding:.5em;">
+                    <div style="font-size:1.2em;margin-bottom:.2em;">💉</div>
+                    <div style="font-family:var(--font-mono);font-size:var(--small-size);color:var(--gold-light);">Inject SKILL.md</div>
+                </div>
+                <div style="color:var(--gold-dim);font-size:1.3em;flex-shrink:0;">→</div>
+                <div style="flex:1;min-width:70px;text-align:center;background:rgba(201,168,76,0.06);border:1px solid var(--border-felt);border-radius:6px;padding:.5em;">
+                    <div style="font-size:1.2em;margin-bottom:.2em;">🤖</div>
+                    <div style="font-family:var(--font-mono);font-size:var(--small-size);color:var(--gold-light);">Agent Executes</div>
+                </div>
+            </div>
+        </div>
+        <div class="card-grid cols-2 reveal d3" style="gap:var(--element-gap);">
+            <div class="info-card gold-border">
+                <div class="card-title" style="font-size:var(--body-size);">✅ Best Practice</div>
+                <ul class="bullet-list" style="margin-top:.3em;">
+                    <li>Descriptions explain <em>what</em> the skill does</li>
+                    <li>Descriptions explain <em>when</em> to use it</li>
+                    <li>Be specific — vague descriptions get missed</li>
+                </ul>
+            </div>
+            <div class="tip-box" style="display:flex;align-items:center;">
+                <div><strong>The Rule:</strong> Well-written descriptions are the difference between a skill that fires automatically and one that sits on the shelf. Write them like poker tells.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══════ SLIDE — CLOSING: HOUSE RULES ══════ -->
+<section class="slide slide-title" id="s30">
+    <div class="bg-chips" data-slide="30"></div>
+    <span class="corner-suit tl">♣</span><span class="corner-suit tr">♦</span>
+    <span class="corner-suit bl">♥</span><span class="corner-suit br">♠</span>
+    <div class="slide-content" style="gap:var(--content-gap);">
+        <div style="text-align:center;" class="reveal d1">
+            <p style="font-family:var(--font-mono);font-size:var(--small-size);color:var(--gold);letter-spacing:.2em;text-transform:uppercase;margin-bottom:.3em;">The House Rules</p>
+            <h2 style="font-family:var(--font-display);font-size:var(--h2-size);color:var(--gold-light);font-weight:900;">Play to Win</h2>
+        </div>
+        <div class="card-grid cols-3" style="gap:var(--element-gap);">
+            <div class="info-card gold-border reveal-deal d2" style="text-align:center;">
+                <div style="font-size:clamp(1.4rem,2.5vw,2rem);margin-bottom:.3em;">📋</div>
+                <div class="card-title" style="font-size:var(--body-size);">Set the Rules</div>
+                <div class="card-body" style="font-size:var(--small-size);">Instructions define how you play — once, for every hand. Version-control them.</div>
+            </div>
+            <div class="info-card gold-border reveal-deal d3" style="text-align:center;">
+                <div style="font-size:clamp(1.4rem,2.5vw,2rem);margin-bottom:.3em;">🃏</div>
+                <div class="card-title" style="font-size:var(--body-size);">Play Position</div>
+                <div class="card-body" style="font-size:var(--small-size);">Critical info at start and end. Never bury your aces in the middle.</div>
+            </div>
+            <div class="info-card gold-border reveal-deal d4" style="text-align:center;">
+                <div style="font-size:clamp(1.4rem,2.5vw,2rem);margin-bottom:.3em;">🪙</div>
+                <div class="card-title" style="font-size:var(--body-size);">Bet Precisely</div>
+                <div class="card-body" style="font-size:var(--small-size);">Scope your instructions. Only put relevant files on the table each hand.</div>
+            </div>
+            <div class="info-card gold-border reveal-deal d4" style="text-align:center;">
+                <div style="font-size:clamp(1.4rem,2.5vw,2rem);margin-bottom:.3em;">♻️</div>
+                <div class="card-title" style="font-size:var(--body-size);">Manage Your Stack</div>
+                <div class="card-body" style="font-size:var(--small-size);">Compress, cache, compact. Don't go all-in on a losing hand.</div>
+            </div>
+            <div class="info-card gold-border reveal-deal d5" style="text-align:center;">
+                <div style="font-size:clamp(1.4rem,2.5vw,2rem);margin-bottom:.3em;">🤖</div>
+                <div class="card-title" style="font-size:var(--body-size);">Hire Specialists</div>
+                <div class="card-body" style="font-size:var(--small-size);">Custom agents and skills — delegate like a pit boss, not a lone player.</div>
+            </div>
+            <div class="info-card gold-border reveal-deal d6" style="text-align:center;">
+                <div style="font-size:clamp(1.4rem,2.5vw,2rem);margin-bottom:.3em;">🏛️</div>
+                <div class="card-title" style="font-size:var(--body-size);">Clean Tables</div>
+                <div class="card-body" style="font-size:var(--small-size);">Modular code = efficient context = better AI results every hand.</div>
+            </div>
+        </div>
+        <div class="suit-divider reveal d6">♠ ♥ ♦ ♣</div>
+        <p style="text-align:center;font-family:var(--font-display);font-style:italic;font-size:var(--h3-size);color:var(--gold-light);" class="reveal d6">The house always wins — unless you engineer your context.</p>
+    </div>
+</section>
+
+<script>
+/* === POKER CHIP FACTORY — spawns real chips into every slide === */
+(function(){
+    const cols=[
+        {edge:'#c9a84c',inner:'#1a3a1a'},   // gold
+        {edge:'#c0392b',inner:'#1a3a1a'},   // red
+        {edge:'#3a6adf',inner:'#1a3a1a'},   // blue
+        {edge:'#c9bfa2',inner:'#1a3a1a'},   // ivory
+        {edge:'#2a8a2a',inner:'#0a180a'},   // green
+    ];
+    const syms=['♠','♥','♦','♣'];
+
+    function makeChip(s, col, left, dur, delay){
+        const chip=document.createElement('div');
+        chip.className='bg-chip';
+        const pad=Math.round(s*0.13);
+        chip.style.cssText=[
+            `width:${s}px`,`height:${s}px`,
+            `left:${left}%`,
+            `animation-duration:${dur}s`,
+            `animation-delay:${delay}s`,
+            `background:repeating-conic-gradient(from 0deg,${col.edge} 0deg 14deg,${col.inner} 14deg 50deg)`,
+            `box-shadow:0 2px 6px rgba(0,0,0,0.5),inset 0 0 4px rgba(0,0,0,0.4)`,
+            `padding:${pad}px`,
+            `display:flex`,`align-items:center`,`justify-content:center`,
+        ].join(';');
+        const inner=document.createElement('div');
+        inner.style.cssText=[
+            `width:100%`,`height:100%`,`border-radius:50%`,
+            `background:radial-gradient(circle at 35% 30%,${col.inner},#0a180c)`,
+            `border:1px dashed ${col.edge}`,
+            `display:flex`,`align-items:center`,`justify-content:center`,
+            `color:${col.edge}`,`font-size:${Math.round(s*0.32)}px`,
+        ].join(';');
+        if(Math.random()>0.45) inner.textContent=syms[~~(Math.random()*syms.length)];
+        chip.appendChild(inner);
+        return chip;
+    }
+
+    // Seed each slide's chip container — count varies by slide type
+    document.querySelectorAll('.bg-chips').forEach(container=>{
+        const isTitle = container.id==='bgChips';
+        const count = isTitle ? 16 : 7;
+        for(let i=0;i<count;i++){
+            const s    = 18 + Math.random()*(isTitle ? 32 : 22);
+            const col  = cols[~~(Math.random()*cols.length)];
+            const left = 3 + Math.random()*94;
+            const dur  = 10 + Math.random()*12;
+            // Stagger so chips appear throughout the slide duration, not all at once
+            const delay= -(Math.random()*dur);
+            container.appendChild(makeChip(s, col, left, dur, delay));
+        }
+    });
+})();
+
+/* === SLIDE CONTROLLER === */
+class Deck{
+    constructor(){
+        this.slides=Array.from(document.querySelectorAll('.slide'));
+        this.cur=0;
+        this._setupIO();
+        this._setupKeys();
+        this._setupWheel();
+        this._setupTouch();
+        this._setupChipNav();
+        setTimeout(()=>this.slides[0]?.classList.add('visible'),80);
+    }
+    _setupIO(){
+        const io=new IntersectionObserver(entries=>{
+            entries.forEach(e=>{
+                if(e.isIntersecting){
+                    e.target.classList.add('visible');
+                    this.cur=this.slides.indexOf(e.target);
+                    this._upd();
+                }
+            });
+        },{threshold:0.5});
+        this.slides.forEach(s=>io.observe(s));
+    }
+    go(n){
+        n=Math.max(0,Math.min(n,this.slides.length-1));
+        this.cur=n;
+        this.slides[n].scrollIntoView({behavior:'smooth'});
+    }
+    _setupKeys(){
+        document.addEventListener('keydown',e=>{
+            if(['ArrowDown','ArrowRight','Space','PageDown'].includes(e.code)){e.preventDefault();this.go(this.cur+1);}
+            if(['ArrowUp','ArrowLeft','PageUp'].includes(e.code)){e.preventDefault();this.go(this.cur-1);}
+            if(e.code==='Home'){e.preventDefault();this.go(0);}
+            if(e.code==='End'){e.preventDefault();this.go(this.slides.length-1);}
+        });
+    }
+    _setupWheel(){
+        let last=0;
+        document.addEventListener('wheel',e=>{
+            const now=Date.now();if(now-last<800)return;last=now;
+            if(e.deltaY>30)this.go(this.cur+1);else if(e.deltaY<-30)this.go(this.cur-1);
+        },{passive:true});
+    }
+    _setupTouch(){
+        let sy=0;
+        document.addEventListener('touchstart',e=>{sy=e.touches[0].clientY;},{passive:true});
+        document.addEventListener('touchend',e=>{
+            const dy=sy-e.changedTouches[0].clientY;
+            if(Math.abs(dy)>50)dy>0?this.go(this.cur+1):this.go(this.cur-1);
+        },{passive:true});
+    }
+    _upd(){
+        const pct=this.cur/(this.slides.length-1)*100;
+        document.getElementById('progressBar').style.width=pct+'%';
+        document.querySelectorAll('.chip-nav-item').forEach((d,i)=>d.classList.toggle('active',i===this.cur));
+    }
+    _setupChipNav(){
+        const nav=document.getElementById('chipNav');
+        this.slides.forEach((_,i)=>{
+            const d=document.createElement('button');
+            d.className='chip-nav-item'+(i===0?' active':'');
+            d.setAttribute('aria-label',`Slide ${i+1}`);
+            d.addEventListener('click',()=>this.go(i));
+            nav.appendChild(d);
+        });
+        this._upd();
+    }
+}
+
+/* === ANIMATE TOKEN BARS === */
+document.querySelectorAll('.token-bar-fill').forEach(bar=>{
+    const t=bar.style.width;bar.style.width='0%';
+    const io=new IntersectionObserver(entries=>{
+        entries.forEach(e=>{if(e.isIntersecting){setTimeout(()=>{bar.style.width=t;},250);io.disconnect();}});
+    },{threshold:0.3});
+    io.observe(bar.closest('.slide')||bar);
+});
+
+new Deck();
+</script>
+</body>
+</html>
