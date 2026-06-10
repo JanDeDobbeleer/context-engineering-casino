@@ -31,8 +31,9 @@
             --ease-out-expo:cubic-bezier(0.16,1,0.3,1);
         }
         *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
-        html,body{height:100%;overflow-x:hidden;background:var(--bg-dark);font-family:var(--font-body);color:var(--text-primary);}
+        html,body{height:100%;overflow-x:hidden;background:var(--bg-dark);font-family:var(--font-body);color:var(--text-primary);scrollbar-width:none;-ms-overflow-style:none;}
         html{scroll-snap-type:y mandatory;scroll-behavior:smooth;}
+        html::-webkit-scrollbar,body::-webkit-scrollbar{display:none;}
 
         /* === VIEWPORT BASE === */
         .slide{width:100vw;height:100vh;height:100dvh;overflow:hidden;scroll-snap-align:start;display:flex;flex-direction:column;position:relative;}
@@ -1145,47 +1146,6 @@
             </div>
         </div>
         <div class="tip-box reveal d3" style="font-size:var(--small-size);"><strong>Learn More:</strong> code.claude.com/docs/en/sub-agents</div>
-    </div>
-</section>
-
-<!-- ══════ SLIDE — AGENT SCOPE & USAGE ══════ -->
-<section class="slide bg-roulette" id="s24">
-    <div class="bg-chips" data-slide="24"></div>
-    <span class="slide-label"><span class="suit spade">♠</span> The Delegation Game</span>
-    <div class="slide-content" style="gap:var(--content-gap);">
-        <div class="reveal d1">
-            <h2 class="slide-heading">How the Pit Boss Delegates</h2>
-            <p class="slide-subheading">The AI reads descriptions and assigns tasks automatically</p>
-        </div>
-        <div class="card-grid cols-2 reveal d2" style="gap:var(--element-gap);">
-            <div class="info-card gold-border">
-                <div class="card-title" style="font-size:var(--body-size);">📂 Storage Scope (by priority)</div>
-                <ul class="bullet-list" style="margin-top:.3em;">
-                    <li><strong>1.</strong> Managed settings — org-wide</li>
-                    <li><strong>2.</strong> <span class="c">--agents</span> CLI flag — session only</li>
-                    <li><strong>3.</strong> <span class="c">.claude/agents/</span> — current project ✅</li>
-                    <li><strong>4.</strong> <span class="c">~/.claude/agents/</span> — all your projects</li>
-                    <li><strong>5.</strong> Plugin <span class="c">agents/</span> — where plugin is enabled</li>
-                </ul>
-            </div>
-            <div class="info-card gold-border">
-                <div class="card-title" style="font-size:var(--body-size);">🛠️ Managing Subagents</div>
-                <ul class="bullet-list" style="margin-top:.3em;">
-                    <li><span class="c">/agents</span> — interactive UI to create/edit/delete</li>
-                    <li><span class="c">claude agents</span> — list all from CLI</li>
-                    <li><strong>Running</strong> tab: view live agents, stop them</li>
-                </ul>
-                <div style="margin-top:.5em;">
-                    <div style="font-family:var(--font-mono);font-size:var(--small-size);color:var(--gold-light);margin-bottom:.3em;">🏗️ Built-in Agents</div>
-                    <ul class="bullet-list">
-                        <li><strong>Explore</strong> — Haiku, read-only code search</li>
-                        <li><strong>Plan</strong> — read-only planning agent</li>
-                        <li><strong>General Purpose</strong> — all tools</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <div class="tip-box reveal d3"><strong>Key:</strong> Write clear, specific <span class="snippet" style="font-size:.85em;">description</span> fields — that's how the AI decides which agent to delegate to automatically.</div>
     </div>
 </section>
 
