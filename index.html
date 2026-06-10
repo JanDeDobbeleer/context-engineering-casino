@@ -299,10 +299,179 @@
         @media(max-height:600px){:root{--slide-padding:clamp(.6rem,2vw,1.5rem);--title-size:clamp(1.2rem,4vw,2.2rem);}.chip-nav,.corner-suit{display:none;}}
         @media(max-width:700px){.card-grid.cols-2,.card-grid.cols-3{grid-template-columns:1fr;}}
         @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.2s!important;}html{scroll-behavior:auto;}}
+
+        /* ═══════════════════════════════════════════════════
+           WHITE / LIGHT THEME  (press T to toggle)
+           ═══════════════════════════════════════════════════ */
+        [data-theme="light"]{
+            --bg-felt:#faf6ee; --bg-dark:#f0ebe0; --bg-card:#ffffff;
+            --felt-mid:#f5f0e5; --felt-light:#fefcf8;
+            --gold:#8a6220; --gold-light:#6b4c18; --gold-dim:#c4a44a;
+            --ivory:#1a0f02; --ivory-dim:#4a3a1a;
+            --red-suit:#b03020; --red-dim:#8b2222;
+            --text-primary:#1a1208; --text-secondary:#3d2e12; --text-muted:#7a6840;
+            --border-gold:rgba(138,98,32,0.35); --border-felt:rgba(138,98,32,0.2);
+        }
+        html[data-theme="light"],
+        html[data-theme="light"] body{background:var(--bg-dark);color:var(--text-primary);}
+
+        /* Slide backgrounds */
+        [data-theme="light"] .slide{box-shadow:inset 0 0 clamp(80px,15vw,220px) rgba(160,120,40,0.1);}
+        [data-theme="light"] .slide::before{
+            background-image:
+              radial-gradient(ellipse at 50% 50%,rgba(245,235,210,0.5) 0%,transparent 70%),
+              repeating-linear-gradient(45deg,rgba(138,100,32,0.02) 0 1px,transparent 1px 14px),
+              repeating-linear-gradient(-45deg,rgba(138,100,32,0.02) 0 1px,transparent 1px 14px),
+              url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.02'/%3E%3C/svg%3E");
+        }
+        [data-theme="light"] .slide::after{opacity:0.35;}
+        [data-theme="light"] .slide-title{background:radial-gradient(ellipse at 50% 40%,#faf6ee 0%,#f5ede2 60%,#ede4d2 100%);}
+        [data-theme="light"] .slide-section{background:radial-gradient(ellipse at 30% 50%,#f5f0e2 0%,#ede6d2 70%);}
+        [data-theme="light"] .bg-roulette{background:radial-gradient(ellipse at 50% 50%,#faf8f0 0%,#f0ebe0 100%);}
+        [data-theme="light"] .bg-blackjack{background:radial-gradient(ellipse at 20% 60%,#f8f4ec 0%,#ede8dc 70%);}
+        [data-theme="light"] .bg-slots{background:radial-gradient(ellipse at 70% 30%,#faf7ee 0%,#f2ece0 80%);}
+        [data-theme="light"] .bg-poker{background:radial-gradient(ellipse at 40% 50%,#f8f5ee 0%,#eee8da 100%);}
+        [data-theme="light"] .bg-highroller{background:radial-gradient(ellipse at 60% 40%,#f6f1e6 0%,#ede5d2 80%);}
+
+        /* Cards */
+        [data-theme="light"] .info-card{background:#fff;border-color:rgba(138,98,32,0.18);box-shadow:0 1px 8px rgba(100,70,20,0.07);}
+        [data-theme="light"] .info-card::before{opacity:0.4;}
+        [data-theme="light"] .info-card.gold-border{border-color:rgba(138,98,32,0.35);}
+        [data-theme="light"] .info-card.red-accent{border-color:rgba(176,48,32,0.3);}
+        [data-theme="light"] .info-card.green-accent{border-color:rgba(30,100,40,0.25);}
+        [data-theme="light"] .info-card.purple-accent{border-color:rgba(120,60,180,0.25);}
+        [data-theme="light"] .info-card.blue-accent{border-color:rgba(30,80,180,0.25);}
+        [data-theme="light"] .info-card::after{color:rgba(138,98,32,0.1);}
+        [data-theme="light"] .info-card.red-accent::after{color:rgba(176,48,32,0.1);}
+        [data-theme="light"] .info-card.green-accent::after{color:rgba(30,100,40,0.1);}
+
+        /* Headings shimmer — dark gold sweep on light bg */
+        [data-theme="light"] .slide-heading,
+        [data-theme="light"] .section-title,
+        [data-theme="light"] .title-main{
+            background:linear-gradient(110deg,
+              var(--gold-light) 0%,var(--gold-light) 35%,
+              var(--gold-dim) 50%,
+              var(--gold-light) 65%,var(--gold-light) 100%);
+            background-size:250% auto;background-position:200% center;
+            background-clip:text;-webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;color:transparent;
+        }
+        [data-theme="light"] .title-main em{
+            background:none;-webkit-text-fill-color:var(--ivory-dim);
+            color:var(--ivory-dim);-webkit-background-clip:initial;background-clip:initial;
+        }
+
+        /* Callout / tip / alert */
+        [data-theme="light"] .callout-box{background:linear-gradient(135deg,rgba(138,98,32,0.06),rgba(138,98,32,0.02));border-color:rgba(138,98,32,0.3);}
+        [data-theme="light"] .callout-box blockquote{color:var(--text-primary);}
+        [data-theme="light"] .callout-box cite{color:var(--gold);}
+        [data-theme="light"] .alert-box{background:rgba(176,48,32,0.06);border-color:rgba(176,48,32,0.25);color:#8b2020;}
+        [data-theme="light"] .tip-box{background:rgba(138,98,32,0.05);border-left-color:var(--gold-dim);color:var(--text-secondary);}
+        [data-theme="light"] .tip-box strong{color:var(--gold);}
+
+        /* Code blocks */
+        [data-theme="light"] .code-block{background:#f4f1e8;border-color:rgba(138,98,32,0.2);color:#2a1f0a;}
+        [data-theme="light"] .kw{color:#1a6b2e;}
+        [data-theme="light"] .st{color:#8a6220;}
+        [data-theme="light"] .cm{color:#8a7a60;}
+        [data-theme="light"] .ky{color:#1a4a8a;}
+        [data-theme="light"] .vl{color:#7020a0;}
+        [data-theme="light"] .snippet{background:rgba(138,98,32,0.1);color:var(--gold);border:1px solid rgba(138,98,32,0.2);}
+        [data-theme="light"] .bullet-list li code,[data-theme="light"] .bullet-list li span.c{background:rgba(138,98,32,0.1);color:var(--gold);}
+
+        /* Token bars */
+        [data-theme="light"] .token-bar{background:rgba(0,0,0,0.07);border-color:rgba(138,98,32,0.18);}
+        [data-theme="light"] .bar-system{background:linear-gradient(90deg,#c0e8c8,#90d0a0);color:#1a5c28;}
+        [data-theme="light"] .bar-history{background:linear-gradient(90deg,#f0c8c4,#e0a09a);color:#8b2020;}
+        [data-theme="light"] .bar-files{background:linear-gradient(90deg,#c4d4f0,#98b4e0);color:#1a3a7a;}
+        [data-theme="light"] .bar-tools{background:linear-gradient(90deg,#f0e0b0,#d8c060);color:#5a3a10;}
+        [data-theme="light"] .bar-free{background:linear-gradient(90deg,rgba(138,98,32,0.1),rgba(138,98,32,0.04));color:var(--gold-dim);}
+
+        /* Attention bars */
+        [data-theme="light"] .attn-bar.high{background:linear-gradient(180deg,#90d0a0,#60b870);border-color:#40a860;}
+        [data-theme="light"] .attn-bar.low{background:linear-gradient(180deg,#f0a8a0,#d87070);border-color:#c05858;}
+        [data-theme="light"] .attn-value.hv{color:#1a5c28;}
+        [data-theme="light"] .attn-value.lv{color:#8b2020;}
+
+        /* Chips */
+        [data-theme="light"] .title-chip{
+            background:repeating-conic-gradient(from 0deg,var(--gold-dim) 0deg 12deg,#f0e8d0 12deg 45deg);
+            box-shadow:0 0 20px rgba(138,98,32,0.2),0 4px 12px rgba(0,0,0,0.08);
+        }
+        [data-theme="light"] .title-chip-inner{
+            background:radial-gradient(circle at 35% 30%,#faf6ee 0%,#ede8d8 80%);
+            border-color:var(--gold-dim);
+            box-shadow:inset 0 0 12px rgba(0,0,0,0.06);
+        }
+        [data-theme="light"] .section-chip{
+            background:repeating-conic-gradient(from 0deg,var(--gold-dim) 0deg 14deg,#f0e8d0 14deg 60deg);
+            box-shadow:0 0 18px rgba(138,98,32,0.18),0 4px 10px rgba(0,0,0,0.08);
+        }
+        [data-theme="light"] .section-chip-inner{
+            background:radial-gradient(circle at 35% 30%,#faf6ee 0%,#ede8d8 80%);
+            border-color:var(--gold-dim);color:var(--gold);
+            box-shadow:inset 0 0 10px rgba(0,0,0,0.05);
+        }
+
+        /* Chip nav */
+        [data-theme="light"] .chip-nav-item{border-color:var(--gold-dim);background:rgba(138,98,32,0.04);}
+        [data-theme="light"] .chip-nav-item.active{
+            background:repeating-conic-gradient(from 0deg,var(--gold-dim) 0deg 14deg,#f5ede0 14deg 50deg);
+            box-shadow:0 0 8px rgba(138,98,32,0.35),0 2px 4px rgba(0,0,0,0.12);
+        }
+        [data-theme="light"] .chip-nav-item.active::after{
+            background:radial-gradient(circle at 35% 30%,#faf6ee,#ede8d8);
+            border-color:var(--gold-dim);
+        }
+
+        /* Progress bar */
+        [data-theme="light"] .progress-bar{
+            background:linear-gradient(90deg,var(--gold-dim),var(--gold),var(--gold-dim));
+            background-size:200% 100%;
+            box-shadow:0 0 5px rgba(138,98,32,0.35);
+        }
+
+        /* Section ghost */
+        [data-theme="light"] .section-ghost{color:rgba(138,98,32,0.07);text-shadow:0 0 30px rgba(138,98,32,0.08);}
+
+        /* Misc text elements */
+        [data-theme="light"] .section-tag{color:var(--gold);}
+        [data-theme="light"] .section-desc{color:var(--text-secondary);}
+        [data-theme="light"] .slide-subheading{color:var(--gold);}
+        [data-theme="light"] .slide-label{color:var(--gold);}
+        [data-theme="light"] .corner-suit.tl,[data-theme="light"] .corner-suit.br{color:var(--text-muted);}
+        [data-theme="light"] .suit-divider{color:var(--gold);}
+        [data-theme="light"] .suit-divider::before{background:linear-gradient(90deg,transparent,var(--gold-dim));}
+        [data-theme="light"] .suit-divider::after{background:linear-gradient(270deg,transparent,var(--gold-dim));}
+        [data-theme="light"] .title-eyebrow{color:var(--gold);}
+        [data-theme="light"] .title-sub{color:var(--text-secondary);}
+
+        /* Hardcoded inline colors — neon green & light blue are illegible on light bg */
+        [data-theme="light"] [style*="color:#6dff8a"]{color:#1a6b2e!important;}
+        [data-theme="light"] [style*="color:#8aaeff"]{color:#1a3a8a!important;}
+        /* Dark-green / dark-blue chip label backgrounds */
+        [data-theme="light"] [style*="background:#1a3a1a"]{background:#d4ecd8!important;border-color:#60a870!important;}
+        [data-theme="light"] [style*="background:#1a2a3a"]{background:#d4dff0!important;border-color:#6080c0!important;}
+
+        /* Theme toggle button */
+        .theme-toggle{
+            position:fixed;top:clamp(.6rem,1.5vh,1rem);right:clamp(.6rem,1.5vw,1rem);
+            z-index:9999;width:2rem;height:2rem;border-radius:50%;
+            background:rgba(201,168,76,0.12);border:1px solid var(--border-gold);
+            color:var(--gold-dim);font-size:.9rem;cursor:pointer;
+            display:flex;align-items:center;justify-content:center;
+            transition:background .25s,transform .2s;
+            backdrop-filter:blur(4px);
+        }
+        .theme-toggle:hover{background:rgba(201,168,76,0.22);transform:scale(1.1);}
+        [data-theme="light"] .theme-toggle{background:rgba(138,98,32,0.1);border-color:rgba(138,98,32,0.3);color:var(--gold);}
+        [data-theme="light"] .theme-toggle:hover{background:rgba(138,98,32,0.18);}
     </style>
 </head>
 <body>
 <div class="progress-bar" id="progressBar"></div>
+<button class="theme-toggle" id="themeToggle" title="Toggle theme (T)">◑</button>
 <nav class="chip-nav" id="chipNav"></nav>
 
 <!-- ══════ SLIDE 0 — TITLE ══════ -->
@@ -1544,6 +1713,24 @@ document.querySelectorAll('.token-bar-fill').forEach(bar=>{
 });
 
 new Deck();
+
+/* === THEME TOGGLE === */
+(function(){
+    const root=document.documentElement;
+    const btn=document.getElementById('themeToggle');
+    const saved=localStorage.getItem('ce-theme');
+    if(saved)root.setAttribute('data-theme',saved);
+    function toggle(){
+        const next=root.getAttribute('data-theme')==='light'?'dark':'light';
+        if(next==='dark')root.removeAttribute('data-theme');
+        else root.setAttribute('data-theme','light');
+        localStorage.setItem('ce-theme',next);
+    }
+    btn.addEventListener('click',toggle);
+    document.addEventListener('keydown',e=>{
+        if(e.code==='KeyT'&&!e.ctrlKey&&!e.metaKey&&!e.altKey)toggle();
+    });
+})();
 </script>
 </body>
 </html>
